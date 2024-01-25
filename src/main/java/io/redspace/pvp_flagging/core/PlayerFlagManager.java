@@ -2,6 +2,7 @@ package io.redspace.pvp_flagging.core;
 
 import io.redspace.pvp_flagging.PvpFlagging;
 import io.redspace.pvp_flagging.network.ClientboundPvpFlagUpdate;
+import io.redspace.pvp_flagging.network.ClientboundSyncPvpData;
 import io.redspace.pvp_flagging.registries.Network;
 import io.redspace.pvp_flagging.util.Logging;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -53,9 +54,11 @@ public class PlayerFlagManager {
         }
     }
 
-//    public void syncAllToPlayer(ServerPlayer serverPlayer){
-//        Network.sendToPlayer( serverPlayer);
-//    }
+    public void syncToPlayer(ServerPlayer serverPlayer) {
+        if (!flaggedPlayers.isEmpty()) {
+            Network.sendToPlayer(new ClientboundSyncPvpData(flaggedPlayers), serverPlayer);
+        }
+    }
 
     public void processUnflags(long gameTime) {
         boolean done = false;

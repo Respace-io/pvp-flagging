@@ -2,6 +2,7 @@ package io.redspace.pvp_flagging.registries;
 
 import io.redspace.pvp_flagging.PvpFlagging;
 import io.redspace.pvp_flagging.network.ClientboundPvpFlagUpdate;
+import io.redspace.pvp_flagging.network.ClientboundSyncPvpData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -32,6 +33,12 @@ public class Network {
                 .decoder(ClientboundPvpFlagUpdate::new)
                 .encoder(ClientboundPvpFlagUpdate::toBytes)
                 .consumerMainThread(ClientboundPvpFlagUpdate::handle)
+                .add();
+
+        net.messageBuilder(ClientboundSyncPvpData.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(ClientboundSyncPvpData::new)
+                .encoder(ClientboundSyncPvpData::toBytes)
+                .consumerMainThread(ClientboundSyncPvpData::handle)
                 .add();
 
         INSTANCE = net;

@@ -18,7 +18,7 @@ public class PvpFlagCommand {
     }
 
     private static int unflag(CommandSourceStack source) {
-        //TODO: This should be configurable
+        //TODO: This timout should be configurable
         PlayerFlagManager.INSTANCE.unflagPlayer(source.getPlayer(), source.getLevel().getGameTime() + 20 * 60);
         return 1;
     }
