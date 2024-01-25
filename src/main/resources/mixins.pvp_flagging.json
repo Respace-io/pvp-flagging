@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "io.redspace.pvp_flagging.mixin",
+  "refmap": "pvp_flagging.refmap.json",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "PlayerMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}
