@@ -29,7 +29,7 @@ public class ClientboundPvpFlagUpdate {
     public void handle(Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context ctx = supplier.get();
         ctx.enqueueWork(() -> {
-            ClientPvpFlagCache.handlePvpFLagUpdate(playerUUID, flagged);
+            ClientPvpFlagCache.handlePvpFlagUpdate(playerUUID, flagged);
         });
     }
 }

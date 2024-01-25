@@ -3,6 +3,7 @@ package io.redspace.pvp_flagging.core;
 import io.redspace.pvp_flagging.PvpFlagging;
 import io.redspace.pvp_flagging.network.ClientboundPvpFlagUpdate;
 import io.redspace.pvp_flagging.network.ClientboundSyncPvpData;
+import io.redspace.pvp_flagging.network.ClientbountPvpUnflagScheduled;
 import io.redspace.pvp_flagging.registries.Network;
 import io.redspace.pvp_flagging.util.Logging;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -29,8 +30,8 @@ public class PlayerFlagManager {
         INSTANCE = new PlayerFlagManager();
     }
 
-    public boolean isPlayerFlagged(Player player) {
-        return flaggedPlayers.contains(player.getUUID());
+    public boolean isPlayerFlagged(@Nullable Player player) {
+        return player != null && flaggedPlayers.contains(player.getUUID());
     }
 
     public boolean areBothPlayersFlagged(Player player1, Player player2) {
@@ -51,6 +52,8 @@ public class PlayerFlagManager {
             }
 
             playersToUnflag.add(new ScheduleUnflagItem(serverPlayer, scheduledTick));
+            //TODO: this should be coming from the config
+            Network.sendToPlayer(new ClientbountPvpUnflagScheduled(60), serverPlayer);
         }
     }
 

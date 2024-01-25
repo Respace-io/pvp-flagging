@@ -1,4 +1,6 @@
 {
-  "commands.pvp_flagging.pvp_command.pvp_on": "Saved data as %s",
-  "commands.pvp_flagging.pvp_command.pvp_off": "Saved data as %s"
+  "ui.pvp_flagging.name_tag_indicator": " §c(PVP)",
+  "ui.pvp_flagging.pvp_on": "You are now flagged for PVP",
+  "ui.pvp_flagging.pvp_off": "You are no longer flagged for PVP",
+  "ui.pvp_flagging.pvp_off_scheduled": "You will no longer flagged for PVP in %s seconds"
 }
