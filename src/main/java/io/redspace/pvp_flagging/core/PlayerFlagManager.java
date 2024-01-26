@@ -1,6 +1,7 @@
 package io.redspace.pvp_flagging.core;
 
 import io.redspace.pvp_flagging.PvpFlagging;
+import io.redspace.pvp_flagging.config.PvpConfig;
 import io.redspace.pvp_flagging.network.ClientboundPvpFlagUpdate;
 import io.redspace.pvp_flagging.network.ClientboundSyncPvpData;
 import io.redspace.pvp_flagging.network.ClientbountPvpUnflagScheduled;
@@ -45,15 +46,29 @@ public class PlayerFlagManager {
         }
     }
 
-    public void unflagPlayer(@Nullable ServerPlayer serverPlayer, long scheduledTick) {
+    public void unflagPlayerImmediate(@Nullable ServerPlayer serverPlayer) {
+        if (serverPlayer != null && flaggedPlayers.contains(serverPlayer.getUUID())) {
+            flaggedPlayers.remove(serverPlayer.getUUID());
+            Network.sendToAllPlayers(new ClientboundPvpFlagUpdate(serverPlayer.getUUID(), false));
+        }
+    }
+
+    public void unflagPlayer(@Nullable ServerPlayer serverPlayer) {
         if (serverPlayer != null && flaggedPlayers.contains(serverPlayer.getUUID())) {
             if (Logging.PLAYER_FLAG_MANAGER) {
                 PvpFlagging.LOGGER.debug("Player {} is scheduled to be unflagged", serverPlayer.getUUID());
             }
 
+            var server = serverPlayer.getServer();
+            long scheduledTick = 0;
+            int waitTicks = 0;
+            if (server != null) {
+                waitTicks = PvpConfig.SERVER.UNFLAG_WAIT_TIME_TICKS.get();
+                scheduledTick = server.overworld().getGameTime() + waitTicks;
+            }
+
             playersToUnflag.add(new ScheduleUnflagItem(serverPlayer, scheduledTick));
-            //TODO: this should be coming from the config
-            Network.sendToPlayer(new ClientbountPvpUnflagScheduled(60), serverPlayer);
+            Network.sendToPlayer(new ClientbountPvpUnflagScheduled(waitTicks), serverPlayer);
         }
     }
 
