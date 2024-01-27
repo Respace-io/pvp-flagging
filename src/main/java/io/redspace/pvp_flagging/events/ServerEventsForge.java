@@ -19,6 +19,7 @@ public class ServerEventsForge {
                     case FLAG -> PlayerFlagManager.INSTANCE.flagPlayer(serverPlayer);
                     case UNFLAG -> PlayerFlagManager.INSTANCE.unflagPlayerImmediate(serverPlayer);
                 }
+                PlayerFlagManager.INSTANCE.syncToPlayer(serverPlayer);
             }
         }
     }
@@ -31,6 +32,7 @@ public class ServerEventsForge {
                     case FLAG -> PlayerFlagManager.INSTANCE.flagPlayer(serverPlayer);
                     case UNFLAG -> PlayerFlagManager.INSTANCE.unflagPlayerImmediate(serverPlayer);
                 }
+                PlayerFlagManager.INSTANCE.syncToPlayer(serverPlayer);
             }
         }
     }

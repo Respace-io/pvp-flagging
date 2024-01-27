@@ -1,5 +1,7 @@
 package io.redspace.pvp_flagging.client;
 
+import io.redspace.pvp_flagging.PvpFlagging;
+import io.redspace.pvp_flagging.util.Logging;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -28,12 +30,20 @@ public class ClientPvpFlagCache {
     }
 
     public static void handlePvpUnflagScheduled(int ticks) {
+        if (Logging.CLIENT_PVP_FLAG_CACHE) {
+            PvpFlagging.LOGGER.debug("handlePvpUnflagScheduled: ticks:{}", ticks);
+        }
+
         if (ticks > 0) {
             Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("ui.pvp_flagging.pvp_off_scheduled", ticks / 20).withStyle(ChatFormatting.RED), false);
         }
     }
 
     public static void handlePvpFlagUpdate(UUID playerUUID, boolean isFlagged) {
+        if (Logging.CLIENT_PVP_FLAG_CACHE) {
+            PvpFlagging.LOGGER.debug("handlePvpFlagUpdate: playerUUID:{}, isFlagged:{}", playerUUID, isFlagged);
+        }
+
         var player = Minecraft.getInstance().player;
         if (player != null && playerUUID.equals(player.getUUID())) {
             if (isFlagged) {
@@ -51,6 +61,10 @@ public class ClientPvpFlagCache {
     }
 
     public static void handleFullPvpDataSync(ObjectSet<UUID> flaggedPlayers) {
+        if (Logging.CLIENT_PVP_FLAG_CACHE) {
+            PvpFlagging.LOGGER.debug("handleFullPvpDataSync: size:{}", flaggedPlayers.size());
+        }
+
         var tmp = new HashMap<UUID, Component>();
         flaggedPlayers.forEach((k) -> {
             tmp.put(k, null);

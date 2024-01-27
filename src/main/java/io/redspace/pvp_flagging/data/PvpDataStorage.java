@@ -1,36 +1,51 @@
-package io.redspace.ironsspellbooks.data;
+package io.redspace.pvp_flagging.data;
 
-import io.redspace.ironsspellbooks.effect.guiding_bolt.GuidingBoltManager;
+import io.redspace.pvp_flagging.PvpFlagging;
+import io.redspace.pvp_flagging.core.PlayerFlagManager;
+import io.redspace.pvp_flagging.core.PvpZoneManager;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.NotNull;
 
-public class IronsDataStorage extends SavedData {
-    public static IronsDataStorage INSTANCE;
+@Mod.EventBusSubscriber
+public class PvpDataStorage extends SavedData {
+    public static PvpDataStorage INSTANCE;
 
     public static void init(DimensionDataStorage dimensionDataStorage) {
         if (dimensionDataStorage != null) {
-            IronsDataStorage.INSTANCE = dimensionDataStorage.computeIfAbsent(
-                    IronsDataStorage::load,
-                    IronsDataStorage::new,
-                    "irons_spellbooks_data");
+            PvpDataStorage.INSTANCE = dimensionDataStorage.computeIfAbsent(
+                    PvpDataStorage::load,
+                    PvpDataStorage::new,
+                    PvpFlagging.MODID);
         }
     }
 
     @Override
     public @NotNull CompoundTag save(@NotNull CompoundTag pCompoundTag) {
-        var tag = new CompoundTag();
-        tag.put("GuidingBoltManager", GuidingBoltManager.INSTANCE.serializeNBT());
-        return tag;
+        pCompoundTag.put("PvpZoneManager", PvpZoneManager.INSTANCE.serializeNBT());
+        pCompoundTag.put("PlayerFlagManager", PlayerFlagManager.INSTANCE.serializeNBT());
+        return pCompoundTag;
     }
 
-    public static IronsDataStorage load(CompoundTag tag) {
+    public static PvpDataStorage load(CompoundTag tag) {
 
-        if (tag.contains("GuidingBoltManager")) {
-            GuidingBoltManager.INSTANCE.deserializeNBT((CompoundTag) tag.get("GuidingBoltManager"));
+        if (tag.contains("PvpZoneManager")) {
+            PvpZoneManager.INSTANCE.deserializeNBT((CompoundTag) tag.get("PvpZoneManager"));
         }
 
-        return new IronsDataStorage();
+        if (tag.contains("PlayerFlagManager")) {
+            PlayerFlagManager.INSTANCE.deserializeNBT((CompoundTag) tag.get("PlayerFlagManager"));
+        }
+
+        return new PvpDataStorage();
+    }
+
+    @SubscribeEvent
+    public static void onServerStartedEvent(ServerStartedEvent event) {
+        PvpDataStorage.init(event.getServer().overworld().getDataStorage());
     }
 }

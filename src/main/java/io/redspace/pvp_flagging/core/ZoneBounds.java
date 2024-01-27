@@ -1,17 +1,21 @@
 package io.redspace.pvp_flagging.core;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.util.INBTSerializable;
 
-public class ZoneBounds {
-    private static final double EPSILON = 1.0E-7D;
-    public final double minX;
-    public final double minZ;
-    public final double maxX;
-    public final double maxZ;
+public class ZoneBounds implements INBTSerializable<CompoundTag> {
+    public int minX;
+    public int minZ;
+    public int maxX;
+    public int maxZ;
 
-    public ZoneBounds(double pX1, double pZ1, double pX2, double pZ2) {
+    private ZoneBounds() {
+    }
+
+    public ZoneBounds(int pX1, int pZ1, int pX2, int pZ2) {
         this.minX = Math.min(pX1, pX2);
         this.minZ = Math.min(pZ1, pZ2);
         this.maxX = Math.max(pX1, pX2);
@@ -19,30 +23,30 @@ public class ZoneBounds {
     }
 
     public ZoneBounds(BlockPos pPos) {
-        this((double) pPos.getX(), (double) pPos.getZ(), (double) (pPos.getX() + 1), (double) (pPos.getZ() + 1));
+        this(pPos.getX(), pPos.getZ(), (pPos.getX() + 1), (pPos.getZ() + 1));
     }
 
     public ZoneBounds(BlockPos pStart, BlockPos pEnd) {
-        this((double) pStart.getX(), (double) pStart.getZ(), (double) pEnd.getX(), (double) pEnd.getZ());
+        this(pStart.getX(), pStart.getZ(), pEnd.getX(), pEnd.getZ());
     }
 
     public ZoneBounds(Vec3 pStart, Vec3 pEnd) {
-        this(pStart.x, pStart.z, pEnd.x, pEnd.z);
+        this((int) pStart.x, (int) pStart.z, (int) pEnd.x, (int) pEnd.z);
     }
 
-    public ZoneBounds setMinX(double pMinX) {
+    public ZoneBounds setMinX(int pMinX) {
         return new ZoneBounds(pMinX, this.minZ, this.maxX, this.maxZ);
     }
 
-    public ZoneBounds setMinZ(double pMinZ) {
+    public ZoneBounds setMinZ(int pMinZ) {
         return new ZoneBounds(this.minX, pMinZ, this.maxX, this.maxZ);
     }
 
-    public ZoneBounds setMaxX(double pMaxX) {
+    public ZoneBounds setMaxX(int pMaxX) {
         return new ZoneBounds(this.minX, this.minZ, pMaxX, this.maxZ);
     }
 
-    public ZoneBounds setMaxZ(double pMaxZ) {
+    public ZoneBounds setMaxZ(int pMaxZ) {
         return new ZoneBounds(this.minX, this.minZ, this.maxX, pMaxZ);
     }
 
@@ -76,40 +80,11 @@ public class ZoneBounds {
         return 31 * j + (int) (i ^ i >>> 32);
     }
 
-    /**
-     * Creates a new {@link AxisAlignedBB} that has been contracted by the given amount, with positive changes decreasing
-     * max values and negative changes increasing min values.
-     * <br/>
-     * If the amount to contract by is larger than the length of a side, then the side will wrap (still creating a valid
-     * ZoneBounds - see last sample).
-     *
-     * <h3>Samples:</h3>
-     * <table>
-     * <tr><th>Input</th><th>Result</th></tr>
-     * <tr><td><pre><code>new AxisAlignedBB(0, 0, 0, 4, 4, 4).contract(2, 2, 2)</code></pre></td><td><pre><samp>box[0.0,
-     * 0.0, 0.0 -> 2.0, 2.0, 2.0]</samp></pre></td></tr>
-     * <tr><td><pre><code>new AxisAlignedBB(0, 0, 0, 4, 4, 4).contract(-2, -2, -
-     * 2)</code></pre></td><td><pre><samp>box[2.0, 2.0, 2.0 -> 4.0, 4.0, 4.0]</samp></pre></td></tr>
-     * <tr><td><pre><code>new AxisAlignedBB(5, 5, 5, 7, 7, 7).contract(0, 1, -1)</code></pre></td><td><pre><samp>box[5.0,
-     * 5.0, 6.0 -> 7.0, 6.0, 7.0]</samp></pre></td></tr>
-     * <tr><td><pre><code>new AxisAlignedBB(-2, -2, -2, 2, 2, 2).contract(4, -4, 0)</code></pre></td><td><pre><samp>box[-
-     * 8.0, 2.0, -2.0 -> -2.0, 8.0, 2.0]</samp></pre></td></tr>
-     * </table>
-     *
-     * <h3>See Also:</h3>
-     * <ul>
-     * <li>{@link #expand(double, double, double)} - like this, except for expanding.</li>
-     * <li>{@link #grow(double, double, double)} and {@link #grow(double)} - expands in all directions.</li>
-     * <li>{@link #shrink(double)} - contracts in all directions (like {@link #grow(double)})</li>
-     * </ul>
-     *
-     * @return A new modified bounding box.
-     */
-    public ZoneBounds contract(double pX, double pZ) {
-        double d0 = this.minX;
-        double d2 = this.minZ;
-        double d3 = this.maxX;
-        double d5 = this.maxZ;
+    public ZoneBounds contract(int pX, int pZ) {
+        int d0 = this.minX;
+        int d2 = this.minZ;
+        int d3 = this.maxX;
+        int d5 = this.maxZ;
         if (pX < 0.0D) {
             d0 -= pX;
         } else if (pX > 0.0D) {
@@ -126,38 +101,14 @@ public class ZoneBounds {
     }
 
     public ZoneBounds expandTowards(Vec3 pVector) {
-        return this.expandTowards(pVector.x, pVector.z);
+        return this.expandTowards((int) pVector.x, (int) pVector.z);
     }
 
-    /**
-     * Creates a new {@link AxisAlignedBB} that has been expanded by the given amount, with positive changes increasing
-     * max values and negative changes decreasing min values.
-     *
-     * <h3>Samples:</h3>
-     * <table>
-     * <tr><th>Input</th><th>Result</th></tr>
-     * <tr><td><pre><code>new AxisAlignedBB(0, 0, 0, 1, 1, 1).expand(2, 2, 2)</code></pre></td><td><pre><samp>box[0, 0, 0
-     * -> 3, 3, 3]</samp></pre></td><td>
-     * <tr><td><pre><code>new AxisAlignedBB(0, 0, 0, 1, 1, 1).expand(-2, -2, -2)</code></pre></td><td><pre><samp>box[-2,
-     * -2, -2 -> 1, 1, 1]</samp></pre></td><td>
-     * <tr><td><pre><code>new AxisAlignedBB(5, 5, 5, 7, 7, 7).expand(0, 1, -1)</code></pre></td><td><pre><samp>box[5, 5,
-     * 4, 7, 8, 7]</samp></pre></td><td>
-     * </table>
-     *
-     * <h3>See Also:</h3>
-     * <ul>
-     * <li>{@link #contract(double, double, double)} - like this, except for shrinking.</li>
-     * <li>{@link #grow(double, double, double)} and {@link #grow(double)} - expands in all directions.</li>
-     * <li>{@link #shrink(double)} - contracts in all directions (like {@link #grow(double)})</li>
-     * </ul>
-     *
-     * @return A modified bounding box that will always be equal or greater in volume to this bounding box.
-     */
-    public ZoneBounds expandTowards(double pX, double pZ) {
-        double d0 = this.minX;
-        double d2 = this.minZ;
-        double d3 = this.maxX;
-        double d5 = this.maxZ;
+    public ZoneBounds expandTowards(int pX, int pZ) {
+        int d0 = this.minX;
+        int d2 = this.minZ;
+        int d3 = this.maxX;
+        int d5 = this.maxZ;
         if (pX < 0.0D) {
             d0 += pX;
         } else if (pX > 0.0D) {
@@ -173,90 +124,47 @@ public class ZoneBounds {
         return new ZoneBounds(d0, d2, d3, d5);
     }
 
-    /**
-     * Creates a new {@link AxisAlignedBB} that has been contracted by the given amount in both directions. Negative
-     * values will shrink the ZoneBounds instead of expanding it.
-     * <br/>
-     * Side lengths will be increased by 2 times the value of the parameters, since both min and max are changed.
-     * <br/>
-     * If contracting and the amount to contract by is larger than the length of a side, then the side will wrap (still
-     * creating a valid ZoneBounds - see last ample).
-     *
-     * <h3>Samples:</h3>
-     * <table>
-     * <tr><th>Input</th><th>Result</th></tr>
-     * <tr><td><pre><code>new AxisAlignedBB(0, 0, 0, 1, 1, 1).grow(2, 2, 2)</code></pre></td><td><pre><samp>box[-2.0, -
-     * 2.0, -2.0 -> 3.0, 3.0, 3.0]</samp></pre></td></tr>
-     * <tr><td><pre><code>new AxisAlignedBB(0, 0, 0, 6, 6, 6).grow(-2, -2, -2)</code></pre></td><td><pre><samp>box[2.0,
-     * 2.0, 2.0 -> 4.0, 4.0, 4.0]</samp></pre></td></tr>
-     * <tr><td><pre><code>new AxisAlignedBB(5, 5, 5, 7, 7, 7).grow(0, 1, -1)</code></pre></td><td><pre><samp>box[5.0,
-     * 4.0, 6.0 -> 7.0, 8.0, 6.0]</samp></pre></td></tr>
-     * <tr><td><pre><code>new AxisAlignedBB(1, 1, 1, 3, 3, 3).grow(-4, -2, -3)</code></pre></td><td><pre><samp>box[-1.0,
-     * 1.0, 0.0 -> 5.0, 3.0, 4.0]</samp></pre></td></tr>
-     * </table>
-     *
-     * <h3>See Also:</h3>
-     * <ul>
-     * <li>{@link #expand(double, double, double)} - expands in only one direction.</li>
-     * <li>{@link #contract(double, double, double)} - contracts in only one direction.</li>
-     * <lu>{@link #grow(double)} - version of this that expands in all directions from one parameter.</li>
-     * <li>{@link #shrink(double)} - contracts in all directions</li>
-     * </ul>
-     *
-     * @return A modified bounding box.
-     */
-    public ZoneBounds inflate(double pX, double pZ) {
-        double d0 = this.minX - pX;
-        double d2 = this.minZ - pZ;
-        double d3 = this.maxX + pX;
-        double d5 = this.maxZ + pZ;
+    public ZoneBounds inflate(int pX, int pZ) {
+        int d0 = this.minX - pX;
+        int d2 = this.minZ - pZ;
+        int d3 = this.maxX + pX;
+        int d5 = this.maxZ + pZ;
         return new ZoneBounds(d0, d2, d3, d5);
     }
 
-    /**
-     * Creates a new {@link AxisAlignedBB} that is expanded by the given value in all directions. Equivalent to {@link
-     * #grow(double, double, double)} with the given value for all 3 params. Negative values will shrink the ZoneBounds.
-     * <br/>
-     * Side lengths will be increased by 2 times the value of the parameter, since both min and max are changed.
-     * <br/>
-     * If contracting and the amount to contract by is larger than the length of a side, then the side will wrap (still
-     * creating a valid ZoneBounds - see samples on {@link #grow(double, double, double)}).
-     *
-     * @return A modified ZoneBounds.
-     */
-    public ZoneBounds inflate(double pValue) {
+    public ZoneBounds inflate(int pValue) {
         return this.inflate(pValue, pValue);
     }
 
     public ZoneBounds intersect(ZoneBounds pOther) {
-        double d0 = Math.max(this.minX, pOther.minX);
-        double d2 = Math.max(this.minZ, pOther.minZ);
-        double d3 = Math.min(this.maxX, pOther.maxX);
-        double d5 = Math.min(this.maxZ, pOther.maxZ);
+        int d0 = Math.max(this.minX, pOther.minX);
+        int d2 = Math.max(this.minZ, pOther.minZ);
+        int d3 = Math.min(this.maxX, pOther.maxX);
+        int d5 = Math.min(this.maxZ, pOther.maxZ);
         return new ZoneBounds(d0, d2, d3, d5);
     }
 
     public ZoneBounds minmax(ZoneBounds pOther) {
-        double d0 = Math.min(this.minX, pOther.minX);
-        double d2 = Math.min(this.minZ, pOther.minZ);
-        double d3 = Math.max(this.maxX, pOther.maxX);
-        double d5 = Math.max(this.maxZ, pOther.maxZ);
+        int d0 = Math.min(this.minX, pOther.minX);
+        int d2 = Math.min(this.minZ, pOther.minZ);
+        int d3 = Math.max(this.maxX, pOther.maxX);
+        int d5 = Math.max(this.maxZ, pOther.maxZ);
         return new ZoneBounds(d0, d2, d3, d5);
     }
 
     /**
      * Offsets the current bounding box by the specified amount.
      */
-    public ZoneBounds move(double pX, double pY, double pZ) {
+    public ZoneBounds move(int pX, int pY, int pZ) {
         return new ZoneBounds(this.minX + pX, this.minZ + pZ, this.maxX + pX, this.maxZ + pZ);
     }
 
     public ZoneBounds move(BlockPos pPos) {
-        return new ZoneBounds(this.minX + (double) pPos.getX(), this.minZ + (double) pPos.getZ(), this.maxX + (double) pPos.getX(), this.maxZ + (double) pPos.getZ());
+        return new ZoneBounds(this.minX + pPos.getX(), this.minZ + pPos.getZ(), this.maxX + pPos.getX(), this.maxZ + pPos.getZ());
     }
 
     public ZoneBounds move(Vec3 pVec) {
-        return this.move(pVec.x, pVec.y, pVec.z);
+        return this.move((int) pVec.x, (int) pVec.y, (int) pVec.z);
     }
 
     /**
@@ -302,23 +210,11 @@ public class ZoneBounds {
         return this.maxZ - this.minZ;
     }
 
-    public ZoneBounds deflate(double pX, double pY, double pZ) {
+    public ZoneBounds deflate(int pX, int pY, int pZ) {
         return this.inflate(-pX, -pZ);
     }
 
-    /**
-     * Creates a new {@link AxisAlignedBB} that is expanded by the given value in all directions. Equivalent to {@link
-     * #grow(double)} with value set to the negative of the value provided here. Passing a negative value to this method
-     * values will grow the ZoneBounds.
-     * <br/>
-     * Side lengths will be decreased by 2 times the value of the parameter, since both min and max are changed.
-     * <br/>
-     * If contracting and the amount to contract by is larger than the length of a side, then the side will wrap (still
-     * creating a valid ZoneBounds - see samples on {@link #grow(double, double, double)}).
-     *
-     * @return A modified ZoneBounds.
-     */
-    public ZoneBounds deflate(double pValue) {
+    public ZoneBounds deflate(int pValue) {
         return this.inflate(-pValue);
     }
 
@@ -340,7 +236,31 @@ public class ZoneBounds {
         return new Vec3(Mth.lerp(0.5D, this.minX, this.maxX), 0, Mth.lerp(0.5D, this.minZ, this.maxZ));
     }
 
-    public static ZoneBounds ofSize(Vec3 pCenter, double pXSize, double pZSize) {
-        return new ZoneBounds(pCenter.x - pXSize / 2.0D, pCenter.z - pZSize / 2.0D, pCenter.x + pXSize / 2.0D, pCenter.z + pZSize / 2.0D);
+    public static ZoneBounds ofSize(Vec3 pCenter, int pXSize, int pZSize) {
+        return new ZoneBounds((int) pCenter.x - pXSize / 2, (int) pCenter.z - pZSize / 2, (int) pCenter.x + pXSize / 2, (int) pCenter.z + pZSize / 2);
+    }
+
+    @Override
+    public CompoundTag serializeNBT() {
+        var tag = new CompoundTag();
+        tag.putInt("minX", minX);
+        tag.putInt("minZ", minZ);
+        tag.putInt("maxX", maxX);
+        tag.putInt("maxZ", maxZ);
+        return tag;
+    }
+
+    @Override
+    public void deserializeNBT(CompoundTag nbt) {
+        minX = nbt.getInt("minX");
+        minZ = nbt.getInt("minZ");
+        maxX = nbt.getInt("maxX");
+        maxZ = nbt.getInt("maxZ");
+    }
+
+    public static ZoneBounds getZoneBounds(CompoundTag nbt) {
+        var zoneBounds = new ZoneBounds();
+        zoneBounds.deserializeNBT(nbt);
+        return zoneBounds;
     }
 }
