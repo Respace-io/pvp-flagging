@@ -65,12 +65,12 @@ public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
     }
 
     public void cancelScheduledUnflag(@Nullable ServerPlayer serverPlayer) {
-        if (Logging.PLAYER_FLAG_MANAGER) {
-            PvpFlagging.LOGGER.debug("PlayerFlagManger cancelScheduledUnflag:{}", serverPlayer);
-        }
-
         if (serverPlayer != null && !playersScheduledToUnflag.isEmpty()) {
             if (playersScheduledToUnflag.remove(serverPlayer.getId()) != null) {
+                if (Logging.PLAYER_FLAG_MANAGER) {
+                    PvpFlagging.LOGGER.debug("PlayerFlagManger cancelScheduledUnflag:{}", serverPlayer);
+                }
+
                 Network.sendToPlayer(new ClientbountPvpCancelScheduledUnflag(0), serverPlayer);
             }
         }
