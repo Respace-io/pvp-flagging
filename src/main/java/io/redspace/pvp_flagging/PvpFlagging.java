@@ -3,6 +3,7 @@ package io.redspace.pvp_flagging;
 import com.mojang.logging.LogUtils;
 import io.redspace.pvp_flagging.config.PvpConfig;
 import io.redspace.pvp_flagging.core.PlayerFlagManager;
+import io.redspace.pvp_flagging.core.PvpZoneManager;
 import io.redspace.pvp_flagging.registries.Network;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -28,5 +29,6 @@ public class PvpFlagging {
     public static void init(FMLCommonSetupEvent event) {
         Network.register();
         PlayerFlagManager.init();
+        PvpZoneManager.init();
     }
 }
