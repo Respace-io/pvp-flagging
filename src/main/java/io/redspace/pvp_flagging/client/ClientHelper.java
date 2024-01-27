@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class ClientPvpFlagCache {
+public class ClientHelper {
     private static HashMap<UUID, Component> flaggedPlayerLookup = new HashMap<>();
     private static final Component nameTagIndicator = Component.translatable("ui.pvp_flagging.name_tag_indicator");
 
@@ -45,6 +45,16 @@ public class ClientPvpFlagCache {
         }
 
         Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("ui.pvp_flagging.pvp_off_scheduled_cancelled").withStyle(ChatFormatting.RED), false);
+    }
+
+    public static void handlePvpZoneWarning() {
+        var player = Minecraft.getInstance().player;
+
+        if (Logging.CLIENT_PVP_FLAG_CACHE) {
+            PvpFlagging.LOGGER.debug("handlePvpZoneWarning player:{}", player);
+        }
+
+        Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("ui.pvp_flagging.pvp_zone.entry_warning").withStyle(ChatFormatting.RED), false);
     }
 
     public static void handlePvpFlagUpdate(UUID playerUUID, boolean isFlagged) {

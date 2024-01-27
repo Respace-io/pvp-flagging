@@ -8,9 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public class PvpZone implements INBTSerializable<CompoundTag> {
-    public String name;
-    public int buffer;
-    public ZoneBounds zoneBounds;
+    private String name;
+    private int buffer;
+    private ZoneBounds zoneBounds;
     private ZoneBounds bufferedZoneBounds = null;
 
     private PvpZone() {
@@ -31,6 +31,10 @@ public class PvpZone implements INBTSerializable<CompoundTag> {
 
     public ZoneBounds getBounds() {
         return this.zoneBounds;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     boolean contains(Vec3 pos) {

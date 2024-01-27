@@ -3,10 +3,7 @@ package io.redspace.pvp_flagging.core;
 import io.redspace.pvp_flagging.PvpFlagging;
 import io.redspace.pvp_flagging.config.PvpConfig;
 import io.redspace.pvp_flagging.data.PvpDataStorage;
-import io.redspace.pvp_flagging.network.ClientboundPvpFlagUpdate;
-import io.redspace.pvp_flagging.network.ClientboundSyncPvpData;
-import io.redspace.pvp_flagging.network.ClientbountPvpCancelScheduledUnflag;
-import io.redspace.pvp_flagging.network.ClientbountPvpUnflagScheduled;
+import io.redspace.pvp_flagging.network.*;
 import io.redspace.pvp_flagging.registries.Network;
 import io.redspace.pvp_flagging.util.Logging;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -61,6 +58,16 @@ public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
             flaggedPlayers.add(serverPlayer.getUUID());
             PvpDataStorage.INSTANCE.setDirty();
             Network.sendToAllPlayers(new ClientboundPvpFlagUpdate(serverPlayer.getUUID(), true));
+        }
+    }
+
+    public void warnPlayer(@Nullable ServerPlayer serverPlayer) {
+        if (Logging.PLAYER_FLAG_MANAGER) {
+            PvpFlagging.LOGGER.debug("PlayerFlagManger warnPlayer:{}", serverPlayer);
+        }
+
+        if (serverPlayer != null) {
+            Network.sendToPlayer(new ClientboundPvpWarnPlayer(), serverPlayer);
         }
     }
 

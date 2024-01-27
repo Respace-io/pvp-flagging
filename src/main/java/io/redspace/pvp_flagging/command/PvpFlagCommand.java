@@ -5,6 +5,7 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.redspace.pvp_flagging.core.PlayerFlagManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 
 public class PvpFlagCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -15,6 +16,8 @@ public class PvpFlagCommand {
                         .executes((context) -> flag(context.getSource())))
                 .then(Commands.literal("off")
                         .executes((context) -> unflag(context.getSource())))
+                .then(Commands.literal("status")
+                        .executes((context) -> status(context.getSource())))
         );
     }
 
@@ -34,6 +37,12 @@ public class PvpFlagCommand {
 
     private static int flag(CommandSourceStack source) {
         PlayerFlagManager.INSTANCE.flagPlayer(source.getPlayer());
+        return 1;
+    }
+
+    private static int status(CommandSourceStack source) {
+        var isPlayerFlagged = PlayerFlagManager.INSTANCE.isPlayerFlagged(source.getPlayer());
+        source.sendSuccess(() -> Component.translatable("ui.pvp_flagging.pvp_status", isPlayerFlagged), true);
         return 1;
     }
 }

@@ -1,6 +1,6 @@
 package io.redspace.pvp_flagging.network;
 
-import io.redspace.pvp_flagging.client.ClientPvpFlagCache;
+import io.redspace.pvp_flagging.client.ClientHelper;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.network.FriendlyByteBuf;
@@ -27,7 +27,7 @@ public class ClientboundSyncPvpData {
     public void handle(Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context ctx = supplier.get();
         ctx.enqueueWork(() -> {
-            ClientPvpFlagCache.handleFullPvpDataSync(flaggedPlayers);
+            ClientHelper.handleFullPvpDataSync(flaggedPlayers);
         });
     }
 }

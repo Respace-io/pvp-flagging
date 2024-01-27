@@ -1,6 +1,6 @@
 package io.redspace.pvp_flagging.network;
 
-import io.redspace.pvp_flagging.client.ClientPvpFlagCache;
+import io.redspace.pvp_flagging.client.ClientHelper;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -24,7 +24,7 @@ public class ClientbountPvpUnflagScheduled {
     public void handle(Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context ctx = supplier.get();
         ctx.enqueueWork(() -> {
-            ClientPvpFlagCache.handlePvpUnflagScheduled(ticks);
+            ClientHelper.handlePvpUnflagScheduled(ticks);
         });
     }
 }

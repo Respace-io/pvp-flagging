@@ -6,25 +6,21 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class ClientbountPvpCancelScheduledUnflag {
-    private final int ticks;
+public class ClientboundPvpWarnPlayer {
+    public ClientboundPvpWarnPlayer() {
 
-    public ClientbountPvpCancelScheduledUnflag(int ticks) {
-        this.ticks = ticks;
     }
 
-    public ClientbountPvpCancelScheduledUnflag(FriendlyByteBuf buf) {
-        ticks = buf.readInt();
+    public ClientboundPvpWarnPlayer(FriendlyByteBuf buf) {
+        buf.readBoolean();
     }
 
     public void toBytes(FriendlyByteBuf buf) {
-        buf.writeInt(ticks);
+        buf.writeBoolean(true);
     }
 
     public void handle(Supplier<NetworkEvent.Context> supplier) {
         NetworkEvent.Context ctx = supplier.get();
-        ctx.enqueueWork(() -> {
-            ClientHelper.handlePvpUnflagScheduleCancelled(ticks);
-        });
+        ctx.enqueueWork(ClientHelper::handlePvpZoneWarning);
     }
 }
