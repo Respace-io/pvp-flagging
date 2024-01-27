@@ -54,7 +54,7 @@ public class Network {
                 .encoder(ClientbountPvpCancelScheduledUnflag::toBytes)
                 .consumerMainThread(ClientbountPvpCancelScheduledUnflag::handle)
                 .add();
-        
+
         INSTANCE = net;
     }
 
