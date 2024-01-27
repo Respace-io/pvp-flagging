@@ -3,6 +3,7 @@ package io.redspace.pvp_flagging.registries;
 import io.redspace.pvp_flagging.PvpFlagging;
 import io.redspace.pvp_flagging.network.ClientboundPvpFlagUpdate;
 import io.redspace.pvp_flagging.network.ClientboundSyncPvpData;
+import io.redspace.pvp_flagging.network.ClientbountPvpCancelScheduledUnflag;
 import io.redspace.pvp_flagging.network.ClientbountPvpUnflagScheduled;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -48,6 +49,12 @@ public class Network {
                 .consumerMainThread(ClientbountPvpUnflagScheduled::handle)
                 .add();
 
+        net.messageBuilder(ClientbountPvpCancelScheduledUnflag.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(ClientbountPvpCancelScheduledUnflag::new)
+                .encoder(ClientbountPvpCancelScheduledUnflag::toBytes)
+                .consumerMainThread(ClientbountPvpCancelScheduledUnflag::handle)
+                .add();
+        
         INSTANCE = net;
     }
 

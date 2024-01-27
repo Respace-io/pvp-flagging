@@ -2,5 +2,6 @@
   "ui.pvp_flagging.name_tag_indicator": " §c(PVP)",
   "ui.pvp_flagging.pvp_on": "You are now flagged for PVP",
   "ui.pvp_flagging.pvp_off": "You are no longer flagged for PVP",
-  "ui.pvp_flagging.pvp_off_scheduled": "You will no longer flagged for PVP in %s seconds"
+  "ui.pvp_flagging.pvp_off_scheduled": "You will no longer flagged for PVP in %s seconds",
+  "ui.pvp_flagging.pvp_off_scheduled_cancelled": "Your PVP unflag request has been cancelled"
 }

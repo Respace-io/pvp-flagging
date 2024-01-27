@@ -22,16 +22,15 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Queue;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Mod.EventBusSubscriber(modid = PvpFlagging.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
     public static PlayerFlagManager INSTANCE;
 
-    private final ObjectSet<UUID> flaggedPlayers = new ObjectOpenHashSet<>();
-    private final Queue<ScheduleUnflagItem> playersToUnflag = new ConcurrentLinkedQueue<>();
+    private final int EXPECTED_SIZE = 20; //This will prevent rehashing when the collection grows and shrinks for most use cases
+    private final ObjectSet<UUID> flaggedPlayers = new ObjectOpenHashSet<>(EXPECTED_SIZE);
+    private final ObjectSet<ScheduleUnflagItem> playersScheduledToUnflag = new ObjectOpenHashSet<>(EXPECTED_SIZE);
 
     public static void init() {
         INSTANCE = new PlayerFlagManager();
@@ -39,6 +38,10 @@ public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
 
     public boolean isPlayerFlagged(@Nullable Player player) {
         return player != null && flaggedPlayers.contains(player.getUUID());
+    }
+
+    public boolean anyPlayersScheduledToUnflag() {
+        return !playersScheduledToUnflag.isEmpty();
     }
 
     public boolean areBothPlayersFlagged(Player player1, Player player2) {
@@ -51,9 +54,22 @@ public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
         }
 
         if (serverPlayer != null) {
+            cancelScheduledUnflag(serverPlayer);
             flaggedPlayers.add(serverPlayer.getUUID());
             PvpDataStorage.INSTANCE.setDirty();
             Network.sendToAllPlayers(new ClientboundPvpFlagUpdate(serverPlayer.getUUID(), true));
+        }
+    }
+
+    public void cancelScheduledUnflag(@Nullable ServerPlayer serverPlayer) {
+        if (Logging.PLAYER_FLAG_MANAGER) {
+            PvpFlagging.LOGGER.debug("PlayerFlagManger cancelScheduledUnflag:{}", serverPlayer);
+        }
+
+        if (!playersScheduledToUnflag.isEmpty()) {
+            if (playersScheduledToUnflag.remove(new ScheduleUnflagItem(serverPlayer, 0))) {
+                //TODO: send notification to player
+            }
         }
     }
 
@@ -64,6 +80,11 @@ public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
 
         if (serverPlayer != null && flaggedPlayers.contains(serverPlayer.getUUID())) {
             flaggedPlayers.remove(serverPlayer.getUUID());
+
+            if (!playersScheduledToUnflag.isEmpty()) {
+                playersScheduledToUnflag.remove(new ScheduleUnflagItem(serverPlayer, 0));
+            }
+
             PvpDataStorage.INSTANCE.setDirty();
             Network.sendToAllPlayers(new ClientboundPvpFlagUpdate(serverPlayer.getUUID(), false));
         }
@@ -87,7 +108,7 @@ public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
                 scheduledTick = server.overworld().getGameTime() + waitTicks;
             }
 
-            playersToUnflag.add(new ScheduleUnflagItem(serverPlayer, scheduledTick));
+            playersScheduledToUnflag.add(new ScheduleUnflagItem(serverPlayer, scheduledTick));
             Network.sendToPlayer(new ClientbountPvpUnflagScheduled(waitTicks), serverPlayer);
         }
     }
@@ -103,25 +124,16 @@ public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
     }
 
     public void processScheduledUnflags(long gameTime) {
-        boolean done = false;
-
-        while (!done) {
-            var unflagItem = playersToUnflag.peek();
-
-            if (unflagItem == null) {
-                done = true;
-            } else {
-                if (unflagItem.scheduledTick < gameTime) {
-                    playersToUnflag.remove();
-                    flaggedPlayers.remove(unflagItem.serverPlayer.getUUID());
-                    PvpDataStorage.INSTANCE.setDirty();
-                    Network.sendToAllPlayers(new ClientboundPvpFlagUpdate(unflagItem.serverPlayer.getUUID(), false));
-
-                    if (Logging.PLAYER_FLAG_MANAGER) {
-                        PvpFlagging.LOGGER.debug("PlayerFlagManger processScheduledUnflags unflagged:{} ", unflagItem.serverPlayer);
-                    }
-                } else {
-                    done = true;
+        var iterator = playersScheduledToUnflag.stream().iterator();
+        while (iterator.hasNext()) {
+            var unflagItem = iterator.next();
+            if (unflagItem.scheduledTick < gameTime) {
+                iterator.remove();
+                flaggedPlayers.remove(unflagItem.serverPlayer.getUUID());
+                PvpDataStorage.INSTANCE.setDirty();
+                Network.sendToAllPlayers(new ClientboundPvpFlagUpdate(unflagItem.serverPlayer.getUUID(), false));
+                if (Logging.PLAYER_FLAG_MANAGER) {
+                    PvpFlagging.LOGGER.debug("PlayerFlagManger processScheduledUnflags unflagged:{} ", unflagItem.serverPlayer);
                 }
             }
         }
@@ -161,6 +173,24 @@ public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
         }
     }
 
-    public static record ScheduleUnflagItem(ServerPlayer serverPlayer, long scheduledTick) {
+    public static class ScheduleUnflagItem {
+        private final ServerPlayer serverPlayer;
+        private final long scheduledTick;
+
+        public ScheduleUnflagItem(ServerPlayer serverPlayer, long scheduledTick) {
+            this.serverPlayer = serverPlayer;
+            this.scheduledTick = scheduledTick;
+        }
+
+        @Override
+        public int hashCode() {
+            return serverPlayer.hashCode();
+        }
+
+        @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+        @Override
+        public boolean equals(Object obj) {
+            return serverPlayer.equals(obj);
+        }
     }
 }

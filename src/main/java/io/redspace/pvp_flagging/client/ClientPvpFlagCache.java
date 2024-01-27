@@ -39,6 +39,14 @@ public class ClientPvpFlagCache {
         }
     }
 
+    public static void handlePvpUnflagScheduleCancelled(int ticks) {
+        if (Logging.CLIENT_PVP_FLAG_CACHE) {
+            PvpFlagging.LOGGER.debug("handlePvpUnflagScheduleCancelled: ticks:{}", ticks);
+        }
+
+        Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("ui.pvp_flagging.pvp_off_scheduled_cancelled").withStyle(ChatFormatting.RED), false);
+    }
+
     public static void handlePvpFlagUpdate(UUID playerUUID, boolean isFlagged) {
         if (Logging.CLIENT_PVP_FLAG_CACHE) {
             PvpFlagging.LOGGER.debug("handlePvpFlagUpdate: playerUUID:{}, isFlagged:{}", playerUUID, isFlagged);
