@@ -26,6 +26,15 @@ public class ServerEventsForge {
     }
 
     @SubscribeEvent
+    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+            if (PlayerFlagManager.INSTANCE != null) {
+                PlayerFlagManager.INSTANCE.cancelScheduledUnflag(serverPlayer);
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer serverPlayer) {
             if (PlayerFlagManager.INSTANCE != null) {
