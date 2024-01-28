@@ -1,4 +1,4 @@
-![PVP Flagging Logo](https://media.forgecdn.net/attachments/797/780/pvp_flagging_logo.png "PVP Flagging")
+![PVP Flagging Logo](img/pvp_flagging_logo)
 
 ## Core Features
 - Players can flag or unflag themselves to opt into PVP
