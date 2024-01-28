@@ -27,10 +27,10 @@
 
 [![Discord](https://img.shields.io/discord/1104430139275743293.svg?label=&amp;logo=discord&amp;logoColor=ffffff&amp;color=7389D8&amp;labelColor=6A7EC2&amp;style=for-the-badge)](https://discord.gg/aCvNWqz5)
 
-![Flagged Player](https://media.forgecdn.net/attachments/797/812/pvp_flagging_image_1.png "Nametag")
+![Flagged Player](img/pvp_flagging_image_1.png)
 
-![Flag](https://media.forgecdn.net/attachments/797/813/pvp_flagging_image_2.png "Flag")
+![Flag](img/pvp_flagging_image_2.png)
 
-![Unflag](https://media.forgecdn.net/attachments/797/814/pvp_flagging_image_3.png "Unflag")
+![Unflag](img/pvp_flagging_image_3.png)
 
-![Warn](https://media.forgecdn.net/attachments/797/815/pvp_flagging_image_4.png "Warn")
+![Warn](img/pvp_flagging_image_4.png)
