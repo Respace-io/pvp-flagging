@@ -1,5 +1,5 @@
 {
-  "ui.pvp_flagging.name_tag_indicator": " §c(PVP)",
+  "ui.pvp_flagging.name_tag_indicator": " §c(\uD83D\uDDE1)",
   "ui.pvp_flagging.pvp_on": "You are now flagged for PVP",
   "ui.pvp_flagging.pvp_off": "You are no longer flagged for PVP",
   "ui.pvp_flagging.pvp_status": "PVP Enabled: %s",
