@@ -4,12 +4,12 @@ import io.redspace.pvp_flagging.PvpFlagging;
 import io.redspace.pvp_flagging.config.PvpConfig;
 import io.redspace.pvp_flagging.core.PlayerFlagManager;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
-@Mod.EventBusSubscriber(modid = PvpFlagging.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = PvpFlagging.MODID, bus = EventBusSubscriber.Bus.GAME)
 public class ServerEventsForge {
     @SubscribeEvent
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
@@ -48,7 +48,7 @@ public class ServerEventsForge {
     }
 
     @SubscribeEvent
-    public static void onLivingHurtEvent(LivingHurtEvent event) {
+    public static void onLivingHurtEvent(LivingDamageEvent.Post event) {
         if (PlayerFlagManager.INSTANCE.anyPlayersScheduledToUnflag()) {
             if (event.getEntity() instanceof ServerPlayer serverPlayer) {
                 PlayerFlagManager.INSTANCE.cancelScheduledUnflag(serverPlayer);

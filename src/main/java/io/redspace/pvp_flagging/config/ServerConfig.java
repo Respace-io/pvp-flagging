@@ -1,16 +1,17 @@
 package io.redspace.pvp_flagging.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ServerConfig {
-    public final ForgeConfigSpec SPEC;
-    public final ForgeConfigSpec.ConfigValue<PvpConfigState> PLAYER_LOGIN_STATE;
-    public final ForgeConfigSpec.ConfigValue<PvpConfigState> PLAYER_RESPAWN_STATE;
-    public final ForgeConfigSpec.ConfigValue<Integer> UNFLAG_WAIT_TIME_TICKS;
-    public final ForgeConfigSpec.ConfigValue<Integer> PVP_ZONE_BOUNDS_CHECK_TICKS;
+    public final ModConfigSpec SPEC;
+    public final ModConfigSpec.ConfigValue<PvpConfigState> PLAYER_LOGIN_STATE;
+    public final ModConfigSpec.ConfigValue<PvpConfigState> PLAYER_RESPAWN_STATE;
+    public final ModConfigSpec.ConfigValue<Integer> UNFLAG_WAIT_TIME_TICKS;
+    public final ModConfigSpec.ConfigValue<Integer> PVP_ZONE_BOUNDS_CHECK_TICKS;
 
     ServerConfig() {
-        var builder = new ForgeConfigSpec.Builder();
+        var builder = new ModConfigSpec.Builder();
         builder.push("PVP_FLAGGING");
         PLAYER_LOGIN_STATE = builder.defineEnum("player_login_state", PvpConfigState.PRESERVE);
         PLAYER_RESPAWN_STATE = builder.defineEnum("player_respawn_state", PvpConfigState.UNFLAG);

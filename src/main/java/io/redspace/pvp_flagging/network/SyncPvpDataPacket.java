@@ -1,34 +1,42 @@
 package io.redspace.pvp_flagging.network;
 
+import io.redspace.pvp_flagging.PvpFlagging;
 import io.redspace.pvp_flagging.client.ClientHelper;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
-import java.util.function.Supplier;
 
-public class ClientboundSyncPvpData {
+public class SyncPvpDataPacket implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<SyncPvpDataPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(PvpFlagging.MODID, "sync_pvp_data"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, SyncPvpDataPacket> STREAM_CODEC = CustomPacketPayload.codec(SyncPvpDataPacket::write, SyncPvpDataPacket::new);
     private final ObjectSet<UUID> flaggedPlayers;
 
-    public ClientboundSyncPvpData(ObjectSet<UUID> flaggedPlayers) {
+    public SyncPvpDataPacket(ObjectSet<UUID> flaggedPlayers) {
         this.flaggedPlayers = flaggedPlayers;//flaggedPlayers.toArray(new UUID[0]);
     }
 
-    public ClientboundSyncPvpData(FriendlyByteBuf buf) {
-        flaggedPlayers = buf.readCollection(ObjectOpenHashSet::new, FriendlyByteBuf::readUUID);
+    public SyncPvpDataPacket(FriendlyByteBuf buf) {
+        flaggedPlayers = buf.readCollection(ObjectOpenHashSet::new, b -> b.readUUID());
     }
 
-    public void toBytes(FriendlyByteBuf buf) {
-        buf.writeCollection(flaggedPlayers, FriendlyByteBuf::writeUUID);
+    public void write(FriendlyByteBuf buf) {
+        buf.writeCollection(flaggedPlayers, (b, v) -> b.writeUUID(v));
     }
 
-    public void handle(Supplier<NetworkEvent.Context> supplier) {
-        NetworkEvent.Context ctx = supplier.get();
-        ctx.enqueueWork(() -> {
-            ClientHelper.handleFullPvpDataSync(flaggedPlayers);
-        });
+    public static void handle(SyncPvpDataPacket packet, IPayloadContext context) {
+        context.enqueueWork(() -> ClientHelper.handleFullPvpDataSync(packet.flaggedPlayers));
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 }
 

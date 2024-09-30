@@ -2,12 +2,13 @@ package io.redspace.pvp_flagging.events;
 
 import io.redspace.pvp_flagging.client.ClientHelper;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderNameTagEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RenderNameTagEvent;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
+
+@EventBusSubscriber(Dist.CLIENT)
 public class ClientEvents {
     @SubscribeEvent
     public static void onRenderNameTagEvent(RenderNameTagEvent event) {

@@ -1,10 +1,12 @@
 package io.redspace.pvp_flagging.core;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.util.INBTSerializable;
+import net.neoforged.neoforge.common.util.INBTSerializable;
+import org.jetbrains.annotations.UnknownNullability;
 
 public class ZoneBounds implements INBTSerializable<CompoundTag> {
     public int minX;
@@ -241,7 +243,7 @@ public class ZoneBounds implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
         var tag = new CompoundTag();
         tag.putInt("minX", minX);
         tag.putInt("minZ", minZ);
@@ -251,7 +253,7 @@ public class ZoneBounds implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
         minX = nbt.getInt("minX");
         minZ = nbt.getInt("minZ");
         maxX = nbt.getInt("maxX");
@@ -260,7 +262,7 @@ public class ZoneBounds implements INBTSerializable<CompoundTag> {
 
     public static ZoneBounds getZoneBounds(CompoundTag nbt) {
         var zoneBounds = new ZoneBounds();
-        zoneBounds.deserializeNBT(nbt);
+        zoneBounds.deserializeNBT(null, nbt);
         return zoneBounds;
     }
 }
