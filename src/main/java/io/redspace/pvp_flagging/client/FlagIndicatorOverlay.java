@@ -71,7 +71,7 @@ public class FlagIndicatorOverlay implements LayeredDraw.Layer {
             float secondsLeft = (unflagTimestamp - player.tickCount) / 20f;
             String timer = secondsLeft >= 60 ? String.format("%s:%s", (int) secondsLeft / 60, (int) secondsLeft % 60) : String.valueOf(((int) (secondsLeft * 10)) / 10f);
             float f = 1 - (unflagTimestamp - player.tickCount) / (float) PvpConfig.SERVER.UNFLAG_WAIT_TIME_TICKS.get();
-            var colorL = (int) Mth.lerp(f * f, 100, 255);
+            var colorL = (int) Mth.lerp(f * f, 50, 255);
             var color = 255 << 24 | 255 << 16 | colorL << 8 | colorL;
 
             guiGraphics.drawString(Minecraft.getInstance().font, timer, x - Minecraft.getInstance().font.width(timer) / 2, y + iconSize - 14, color, true);
