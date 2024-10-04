@@ -110,7 +110,7 @@ public class PvpZoneManager implements INBTSerializable<CompoundTag> {
             //TODO: currently assumes this is server side.. maybe check explicitly
 
             var server = player.getServer();
-            if (server != null && server.overworld().getGameTime() % INSTANCE.boundsCheckTicks() == 0 && !PlayerFlagManager.INSTANCE.isPlayerFlagged(player)) {
+            if (server != null && server.overworld().getGameTime() % INSTANCE.boundsCheckTicks() == 0) {
                 if (INSTANCE.boundsCheckShouldFlag(player)) {
                     PlayerFlagManager.INSTANCE.flagPlayer((ServerPlayer) player);
                 } else if (INSTANCE.boundsCheckShouldWarn(player)) {

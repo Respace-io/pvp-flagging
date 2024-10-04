@@ -47,6 +47,10 @@ public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
         return !playersScheduledToUnflag.isEmpty();
     }
 
+    public boolean isScheduledToUnflag(ServerPlayer player) {
+        return playersScheduledToUnflag.containsKey(player.getId());
+    }
+
     public boolean areBothPlayersFlagged(Player player1, Player player2) {
         return flaggedPlayers.contains(player1.getUUID()) && flaggedPlayers.contains(player2.getUUID());
     }

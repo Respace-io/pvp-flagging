@@ -3,7 +3,9 @@
   "ui.pvp_flagging.pvp_on": "You are now flagged for PVP",
   "ui.pvp_flagging.pvp_off": "You are no longer flagged for PVP",
   "ui.pvp_flagging.pvp_status": "PVP Enabled: %s",
-  "ui.pvp_flagging.pvp_off_scheduled": "You will no longer flagged for PVP in %s seconds",
+  "ui.pvp_flagging.pvp_off_scheduled": "You will no longer be flagged for PVP in %s seconds",
   "ui.pvp_flagging.pvp_off_scheduled_cancelled": "Your PVP unflag request has been cancelled",
-  "ui.pvp_flagging.pvp_zone.entry_warning": "You are about to enter a PVP zone and will be flagged."
+  "ui.pvp_flagging.pvp_zone.entry_warning.unflagged": "You are about to enter a PVP zone and will be flagged.",
+  "ui.pvp_flagging.pvp_zone.entry_warning.flagged": "You are about to enter a PVP zone.",
+  "ui.pvp_flagging.pvp_zone.prevent_unflag": "You cannot unflag inside a PVP zone."
 }

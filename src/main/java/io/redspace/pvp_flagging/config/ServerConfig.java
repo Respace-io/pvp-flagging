@@ -15,7 +15,7 @@ public class ServerConfig {
         builder.push("PVP_FLAGGING");
         PLAYER_LOGIN_STATE = builder.defineEnum("player_login_state", PvpConfigState.PRESERVE);
         PLAYER_RESPAWN_STATE = builder.defineEnum("player_respawn_state", PvpConfigState.UNFLAG);
-        UNFLAG_WAIT_TIME_TICKS = builder.define("unflag_wait_time_ticks", 1200);
+        UNFLAG_WAIT_TIME_TICKS = builder.define("unflag_wait_time_ticks", 15 * 20);
         PVP_ZONE_BOUNDS_CHECK_TICKS = builder.define("pvp_zone_bounds_check_ticks", 20);
         builder.pop();
         SPEC = builder.build();
