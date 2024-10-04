@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public class ClientHelper {
     private static HashMap<UUID, Component> flaggedPlayerLookup = new HashMap<>();
-    private static final Component nameTagIndicator = Component.translatable("ui.pvp_flagging.name_tag_indicator");
+    public static final Component nameTagIndicator = Component.translatable("ui.pvp_flagging.name_tag_indicator");
     private static int unflagTimestamp = -1;
 
     public static @Nullable Component getNameTag(Player player) {
@@ -30,8 +30,11 @@ public class ClientHelper {
         return newTag;
     }
 
+    public static boolean isFlagged(UUID uuid) {
+        return flaggedPlayerLookup.containsKey(uuid);
+    }
     public static boolean isFlagged(Player player) {
-        return flaggedPlayerLookup.containsKey(player.getUUID());
+        return isFlagged(player.getUUID());
     }
 
     public static void handlePvpUnflagScheduled(int ticks) {
