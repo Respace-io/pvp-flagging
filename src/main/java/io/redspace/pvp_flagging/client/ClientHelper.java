@@ -33,6 +33,7 @@ public class ClientHelper {
     public static boolean isFlagged(UUID uuid) {
         return flaggedPlayerLookup.containsKey(uuid);
     }
+
     public static boolean isFlagged(Player player) {
         return isFlagged(player.getUUID());
     }
@@ -61,6 +62,10 @@ public class ClientHelper {
 
     public static int getUnflagTimestamp() {
         return unflagTimestamp;
+    }
+
+    public static void resetUnflagTimestamp() {
+        unflagTimestamp = -1;
     }
 
     public static void handlePvpZoneWarning() {
@@ -108,5 +113,6 @@ public class ClientHelper {
             tmp.put(k, null);
         });
         flaggedPlayerLookup = tmp;
+        unflagTimestamp = -1;
     }
 }
