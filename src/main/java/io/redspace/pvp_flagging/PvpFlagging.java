@@ -41,7 +41,7 @@ public class PvpFlagging {
     {
         @SubscribeEvent
         public static void registerOverlays(RegisterGuiLayersEvent event) {
-            event.registerAboveAll(ResourceLocation.fromNamespaceAndPath(PvpFlagging.MODID, "flag_status_overlay"), FlagIndicatorOverlay.INSTANCE);
+            event.registerBelowAll(ResourceLocation.fromNamespaceAndPath(PvpFlagging.MODID, "flag_status_overlay"), FlagIndicatorOverlay.INSTANCE);
         }
     }
 }

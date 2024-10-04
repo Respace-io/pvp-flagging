@@ -37,7 +37,7 @@ public class FlagIndicatorOverlay implements LayeredDraw.Layer {
         var screenWidth = guiGraphics.guiWidth();
         var screenHeight = guiGraphics.guiHeight();
         var player = Minecraft.getInstance().player;
-        if (player == null || !PvpConfig.CLIENT.INDICATOR_ENABLED.get()) {
+        if (player == null || !PvpConfig.CLIENT.INDICATOR_ENABLED.get() || player.isSpectator() || Minecraft.getInstance().options.hideGui) {
             return;
         }
         boolean flagged = ClientHelper.isFlagged(player);
