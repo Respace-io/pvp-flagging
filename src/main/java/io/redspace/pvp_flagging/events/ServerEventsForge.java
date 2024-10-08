@@ -49,16 +49,12 @@ public class ServerEventsForge {
 
     @SubscribeEvent
     public static void onLivingHurtEvent(LivingHurtEvent event) {
-        if (PlayerFlagManager.INSTANCE.anyPlayersScheduledToUnflag()) {
-            if (event.getEntity() instanceof ServerPlayer serverPlayer) {
-                PlayerFlagManager.INSTANCE.cancelScheduledUnflag(serverPlayer);
-            }
-            if (event.getSource().getEntity() instanceof ServerPlayer serverPlayer) {
-                PlayerFlagManager.INSTANCE.cancelScheduledUnflag(serverPlayer);
-            }
-            if (event.getSource().getDirectEntity() instanceof ServerPlayer serverPlayer) {
-                PlayerFlagManager.INSTANCE.cancelScheduledUnflag(serverPlayer);
-            }
+        var victim = event.getEntity();
+        var attacker = event.getSource().getEntity();
+        boolean pvp = victim instanceof ServerPlayer && attacker instanceof ServerPlayer;
+        if (pvp && PlayerFlagManager.INSTANCE.anyPlayersScheduledToUnflag()) {
+            PlayerFlagManager.INSTANCE.cancelScheduledUnflag((ServerPlayer) victim);
+            PlayerFlagManager.INSTANCE.cancelScheduledUnflag((ServerPlayer) attacker);
         }
     }
 }

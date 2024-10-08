@@ -3,6 +3,7 @@ package io.redspace.pvp_flagging.command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.redspace.pvp_flagging.core.PlayerFlagManager;
+import io.redspace.pvp_flagging.core.PvpZoneManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -22,8 +23,13 @@ public class PvpFlagCommand {
     }
 
     private static int toggleFlag(CommandSourceStack source) {
-        if (PlayerFlagManager.INSTANCE.isPlayerFlagged(source.getPlayer())) {
-            unflag(source);
+        if (source.getPlayer() != null && PlayerFlagManager.INSTANCE.isPlayerFlagged(source.getPlayer()) && !PlayerFlagManager.INSTANCE.isScheduledToUnflag(source.getPlayer())) {
+            if (PvpZoneManager.INSTANCE.boundsCheckShouldFlag(source.getPlayer())) {
+                //Prevent unflagging from inside a pvp zone
+                source.sendFailure(Component.translatable("ui.pvp_flagging.pvp_zone.prevent_unflag"));
+            } else {
+                unflag(source);
+            }
         } else {
             flag(source);
         }

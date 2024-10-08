@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.Mod;
 public class ClientEvents {
     @SubscribeEvent
     public static void onRenderNameTagEvent(RenderNameTagEvent event) {
+        //Fixme: this overrides team formatting (and modded formatting)
         if (event.getEntity() instanceof Player player) {
             var newTag = ClientHelper.getNameTag(player);
             if (newTag != null) {

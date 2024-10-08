@@ -14,7 +14,8 @@ import java.util.UUID;
 
 public class ClientHelper {
     private static HashMap<UUID, Component> flaggedPlayerLookup = new HashMap<>();
-    private static final Component nameTagIndicator = Component.translatable("ui.pvp_flagging.name_tag_indicator");
+    public static final Component nameTagIndicator = Component.translatable("ui.pvp_flagging.name_tag_indicator");
+    private static int unflagTimestamp = -1;
 
     public static @Nullable Component getNameTag(Player player) {
         Component newTag = null;
@@ -29,6 +30,14 @@ public class ClientHelper {
         return newTag;
     }
 
+    public static boolean isFlagged(UUID uuid) {
+        return flaggedPlayerLookup.containsKey(uuid);
+    }
+
+    public static boolean isFlagged(Player player) {
+        return isFlagged(player.getUUID());
+    }
+
     public static void handlePvpUnflagScheduled(int ticks) {
         if (Logging.CLIENT_PVP_FLAG_CACHE) {
             PvpFlagging.LOGGER.debug("handlePvpUnflagScheduled: ticks:{}", ticks);
@@ -36,6 +45,9 @@ public class ClientHelper {
 
         if (ticks > 0) {
             Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("ui.pvp_flagging.pvp_off_scheduled", ticks / 20).withStyle(ChatFormatting.RED), false);
+            if (Minecraft.getInstance().player != null) {
+                unflagTimestamp = Minecraft.getInstance().player.tickCount + ticks;
+            }
         }
     }
 
@@ -45,6 +57,15 @@ public class ClientHelper {
         }
 
         Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("ui.pvp_flagging.pvp_off_scheduled_cancelled").withStyle(ChatFormatting.RED), false);
+        unflagTimestamp = -1;
+    }
+
+    public static int getUnflagTimestamp() {
+        return unflagTimestamp;
+    }
+
+    public static void resetUnflagTimestamp() {
+        unflagTimestamp = -1;
     }
 
     public static void handlePvpZoneWarning() {
@@ -54,7 +75,11 @@ public class ClientHelper {
             PvpFlagging.LOGGER.debug("handlePvpZoneWarning player:{}", player);
         }
 
-        Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("ui.pvp_flagging.pvp_zone.entry_warning").withStyle(ChatFormatting.RED), false);
+        if (player != null && isFlagged(player)) {
+            Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("ui.pvp_flagging.pvp_zone.entry_warning.flagged").withStyle(ChatFormatting.RED), false);
+        } else {
+            Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("ui.pvp_flagging.pvp_zone.entry_warning.unflagged").withStyle(ChatFormatting.RED), false);
+        }
     }
 
     public static void handlePvpFlagUpdate(UUID playerUUID, boolean isFlagged) {
@@ -88,5 +113,6 @@ public class ClientHelper {
             tmp.put(k, null);
         });
         flaggedPlayerLookup = tmp;
+        unflagTimestamp = -1;
     }
 }

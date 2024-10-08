@@ -109,8 +109,8 @@ public class PvpZoneManager implements INBTSerializable<CompoundTag> {
         if (event.side == LogicalSide.SERVER && event.phase == TickEvent.Phase.END && !INSTANCE.getZones().isEmpty()) {
             var player = event.player;
             var server = player.getServer();
-            if (server != null && server.overworld().getGameTime() % INSTANCE.boundsCheckTicks() == 0 && !PlayerFlagManager.INSTANCE.isPlayerFlagged(player)) {
-                if (INSTANCE.boundsCheckShouldFlag(player)) {
+            if (server != null && server.overworld().getGameTime() % INSTANCE.boundsCheckTicks() == 0) {
+                if (!PlayerFlagManager.INSTANCE.isPlayerFlagged(player) && INSTANCE.boundsCheckShouldFlag(player)) {
                     PlayerFlagManager.INSTANCE.flagPlayer((ServerPlayer) player);
                 } else if (INSTANCE.boundsCheckShouldWarn(player)) {
                     PlayerFlagManager.INSTANCE.warnPlayer((ServerPlayer) player);
