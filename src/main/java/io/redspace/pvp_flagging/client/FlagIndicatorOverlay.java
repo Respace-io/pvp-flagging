@@ -42,8 +42,8 @@ public class FlagIndicatorOverlay implements IGuiOverlay {
         if (!flagged) {
             return;
         }
-        int unflagTimestamp = ClientHelper.getUnflagTimestamp();
-        boolean unflagging = unflagTimestamp >= player.tickCount;
+        int unflagTicksLeft = ClientHelper.getUnflagTimestamp() - Minecraft.getInstance().player.tickCount;
+        boolean unflagging = unflagTicksLeft >= 0;
 
         var anchor = PvpConfig.CLIENT.INDICATOR_HUD_ANCHOR.get();
         var halfHeight = screenHeight / 2;
@@ -66,9 +66,9 @@ public class FlagIndicatorOverlay implements IGuiOverlay {
         guiGraphics.pose().popPose();
 
         if (unflagging) {
-            float secondsLeft = (unflagTimestamp - player.tickCount) / 20f;
+            float secondsLeft = unflagTicksLeft / 20f;
             String timer = secondsLeft >= 60 ? String.format("%s:%s", (int) secondsLeft / 60, (int) secondsLeft % 60) : String.valueOf(((int) (secondsLeft * 10)) / 10f);
-            float f = 1 - (unflagTimestamp - player.tickCount) / (float) PvpConfig.SERVER.UNFLAG_WAIT_TIME_TICKS.get();
+            float f = 1 - (unflagTicksLeft) / (float) PvpConfig.SERVER.UNFLAG_WAIT_TIME_TICKS.get();
             var colorL = (int) Mth.lerp(f * f, 50, 255);
             var color = 255 << 24 | 255 << 16 | colorL << 8 | colorL;
 

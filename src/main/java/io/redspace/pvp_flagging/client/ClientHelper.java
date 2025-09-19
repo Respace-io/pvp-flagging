@@ -93,6 +93,7 @@ public class ClientHelper {
                 Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("ui.pvp_flagging.pvp_on").withStyle(ChatFormatting.RED), false);
             } else {
                 Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("ui.pvp_flagging.pvp_off").withStyle(ChatFormatting.RED), false);
+                resetUnflagTimestamp();
             }
         }
 

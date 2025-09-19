@@ -2,6 +2,7 @@ package io.redspace.pvp_flagging.events;
 
 import io.redspace.pvp_flagging.PvpFlagging;
 import io.redspace.pvp_flagging.config.PvpConfig;
+import io.redspace.pvp_flagging.config.ServerConfig;
 import io.redspace.pvp_flagging.core.PlayerFlagManager;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -52,9 +53,15 @@ public class ServerEventsForge {
         var victim = event.getEntity();
         var attacker = event.getSource().getEntity();
         boolean pvp = victim instanceof ServerPlayer && attacker instanceof ServerPlayer;
-        if (pvp && PlayerFlagManager.INSTANCE.anyPlayersScheduledToUnflag()) {
-            PlayerFlagManager.INSTANCE.cancelScheduledUnflag((ServerPlayer) victim);
-            PlayerFlagManager.INSTANCE.cancelScheduledUnflag((ServerPlayer) attacker);
+        if (pvp) {
+            if (PlayerFlagManager.INSTANCE.anyPlayersScheduledToUnflag()) {
+                PlayerFlagManager.INSTANCE.cancelScheduledUnflag((ServerPlayer) victim);
+                PlayerFlagManager.INSTANCE.cancelScheduledUnflag((ServerPlayer) attacker);
+            }
+            float pvpDamageMultiplier = PvpConfig.SERVER.PVP_DAMAGE_MULIPLIER.get().floatValue();
+            if (pvpDamageMultiplier != 1.0f) {
+                event.setAmount(pvpDamageMultiplier * event.getAmount());
+            }
         }
     }
 }
