@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,20 +15,25 @@ import java.util.UUID;
 
 public class ClientHelper {
     private static HashMap<UUID, Component> flaggedPlayerLookup = new HashMap<>();
-    public static final Component nameTagIndicator = Component.translatable("ui.pvp_flagging.name_tag_indicator");
+    public static final Component NAME_TAG_INDICATOR = Component.translatable("ui.pvp_flagging.name_tag_indicator");
     private static int unflagTimestamp = -1;
 
+    @Deprecated(forRemoval = true)
     public static @Nullable Component getNameTag(Player player) {
         Component newTag = null;
         if (flaggedPlayerLookup.containsKey(player.getUUID())) {
             newTag = flaggedPlayerLookup.get(player.getUUID());
             if (newTag == null) {
-                newTag = player.getDisplayName().copy().append(nameTagIndicator);
+                newTag = player.getDisplayName().copy().append(NAME_TAG_INDICATOR);
                 flaggedPlayerLookup.put(player.getUUID(), newTag);
             }
         }
 
         return newTag;
+    }
+
+    public static Component modifyNameTag(Component nameTag) {
+        return nameTag.copy().append(NAME_TAG_INDICATOR);
     }
 
     public static boolean isFlagged(UUID uuid) {
