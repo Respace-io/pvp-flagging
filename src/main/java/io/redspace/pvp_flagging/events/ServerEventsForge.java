@@ -4,6 +4,10 @@ import io.redspace.pvp_flagging.PvpFlagging;
 import io.redspace.pvp_flagging.config.PvpConfig;
 import io.redspace.pvp_flagging.config.ServerConfig;
 import io.redspace.pvp_flagging.core.PlayerFlagManager;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -22,6 +26,18 @@ public class ServerEventsForge {
                     case UNFLAG -> PlayerFlagManager.INSTANCE.unflagPlayerImmediate(serverPlayer);
                 }
                 PlayerFlagManager.INSTANCE.syncToPlayer(serverPlayer);
+            }
+            if (PvpConfig.SERVER.WELCOME_MESSAGE.get() && !serverPlayer.getPersistentData().getBoolean("pvp_flagging_hint")) {
+                serverPlayer.getPersistentData().putBoolean("pvp_flagging_hint", true);
+                serverPlayer.sendSystemMessage(
+                        Component.translatable("ui.pvp_flagging.system_message",
+                                Component.translatable("ui.pvp_flagging.welcome",
+                                        Component.translatable("ui.pvp_flagging.welcome.command_hint")
+                                                .withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/pvpFlag")))
+                                                .withStyle(ChatFormatting.RED, ChatFormatting.UNDERLINE)
+                                ).withStyle(ChatFormatting.YELLOW)
+                        ).withStyle(ChatFormatting.GOLD)
+                );
             }
         }
     }
@@ -53,15 +69,16 @@ public class ServerEventsForge {
         var victim = event.getEntity();
         var attacker = event.getSource().getEntity();
         boolean pvp = victim instanceof ServerPlayer && attacker instanceof ServerPlayer;
-        if (pvp) {
-            if (PlayerFlagManager.INSTANCE.anyPlayersScheduledToUnflag()) {
-                PlayerFlagManager.INSTANCE.cancelScheduledUnflag((ServerPlayer) victim);
-                PlayerFlagManager.INSTANCE.cancelScheduledUnflag((ServerPlayer) attacker);
-            }
-            float pvpDamageMultiplier = PvpConfig.SERVER.PVP_DAMAGE_MULIPLIER.get().floatValue();
-            if (pvpDamageMultiplier != 1.0f) {
-                event.setNewDamage(pvpDamageMultiplier * event.getNewDamage());
-            }
+        if (!pvp) {
+            return;
+        }
+        if (PlayerFlagManager.INSTANCE.anyPlayersScheduledToUnflag()) {
+            PlayerFlagManager.INSTANCE.cancelScheduledUnflag((ServerPlayer) victim);
+            PlayerFlagManager.INSTANCE.cancelScheduledUnflag((ServerPlayer) attacker);
+        }
+        float pvpDamageMultiplier = PvpConfig.SERVER.PVP_DAMAGE_MULIPLIER.get().floatValue();
+        if (pvpDamageMultiplier != 1.0f) {
+            event.setNewDamage(pvpDamageMultiplier * event.getNewDamage());
         }
     }
 }
