@@ -4,6 +4,11 @@ import io.redspace.pvp_flagging.PvpFlagging;
 import io.redspace.pvp_flagging.core.PlayerFlagManager;
 import io.redspace.pvp_flagging.core.PvpZoneManager;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraftforge.event.server.ServerStartedEvent;
@@ -26,15 +31,27 @@ public class PvpDataStorage extends SavedData {
 
     @Override
     public @NotNull CompoundTag save(@NotNull CompoundTag pCompoundTag) {
-        pCompoundTag.put("PvpZoneManager", PvpZoneManager.INSTANCE.serializeNBT());
-        pCompoundTag.put("PlayerFlagManager", PlayerFlagManager.INSTANCE.serializeNBT());
-        return pCompoundTag;
+        ListTag allZoneManagers = new ListTag();
+        for (Map.Entry<ResourceKey<Level>, PvpZoneManager> entry : PvpZoneManager.INSTANCES.entrySet()) {
+            CompoundTag tuple = new CompoundTag();
+            tuple.putString("level", entry.getKey().location().toString());
+            tuple.put("manager", entry.getValue().serializeNBT());
+            allZoneManagers.add(tuple);
+        }
+        compoundTag.put("PvpZoneManager", allZoneManagers);
+        compoundTag.put("PlayerFlagManager", PlayerFlagManager.INSTANCE.serializeNBT());
+        return compoundTag;
     }
 
     public static PvpDataStorage load(CompoundTag tag) {
 
         if (tag.contains("PvpZoneManager")) {
-            PvpZoneManager.INSTANCE.deserializeNBT((CompoundTag) tag.get("PvpZoneManager"));
+            ListTag allZoneManagers = tag.getList("PvpZoneManager", ListTag.TAG_COMPOUND);
+            for (Tag t : allZoneManagers) {
+                CompoundTag tuple = (CompoundTag) t;
+                ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(tuple.getString("level")));
+                PvpZoneManager.getInstance(dimension).deserializeNBT(tuple.getCompound("manager"));
+            }
         }
 
         if (tag.contains("PlayerFlagManager")) {

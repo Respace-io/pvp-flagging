@@ -10,5 +10,8 @@
   "ui.pvp_flagging.pvp_zone.prevent_unflag": "You cannot unflag inside a PVP zone.",
   "ui.pvp_flagging.welcome": "PVP flagging is enabled! In order to fight players, use %s to toggle your PVP Flag Status",
   "ui.pvp_flagging.system_message": "[PVP Flagging]: %s",
-  "ui.pvp_flagging.welcome.command_hint": "/pvpFlag"
+  "ui.pvp_flagging.welcome.command_hint": "/pvpFlag",
+  "command.pvp_flagging.zone.add.success": "Zone \"%s\" Added",
+  "command.pvp_flagging.zone.add.fail": "Failed to add Zone \"%s\", already exists",
+  "command.pvp_flagging.zone.list.empty": "There are no PVP Zones"
 }
