@@ -24,12 +24,7 @@ public class PvpFlagCommand {
 
     private static int toggleFlag(CommandSourceStack source) {
         if (source.getPlayer() != null && PlayerFlagManager.INSTANCE.isPlayerFlagged(source.getPlayer()) && !PlayerFlagManager.INSTANCE.isScheduledToUnflag(source.getPlayer())) {
-            if (PvpZoneManager.INSTANCE.boundsCheckShouldFlag(source.getPlayer())) {
-                //Prevent unflagging from inside a pvp zone
-                source.sendFailure(Component.translatable("ui.pvp_flagging.pvp_zone.prevent_unflag"));
-            } else {
-                unflag(source);
-            }
+            unflag(source);
         } else {
             flag(source);
         }
@@ -37,8 +32,17 @@ public class PvpFlagCommand {
     }
 
     private static int unflag(CommandSourceStack source) {
-        PlayerFlagManager.INSTANCE.unflagPlayer(source.getPlayer());
-        return 1;
+        if (source.getPlayer() == null) {
+            return 0;
+        }
+        if (PvpZoneManager.getInstance(source.getPlayer().level()).boundsCheckShouldFlag(source.getPlayer())) {
+            //Prevent unflagging from inside a pvp zone
+            source.sendFailure(Component.translatable("ui.pvp_flagging.pvp_zone.prevent_unflag"));
+            return 0;
+        } else {
+            PlayerFlagManager.INSTANCE.unflagPlayer(source.getPlayer());
+            return 1;
+        }
     }
 
     private static int flag(CommandSourceStack source) {
