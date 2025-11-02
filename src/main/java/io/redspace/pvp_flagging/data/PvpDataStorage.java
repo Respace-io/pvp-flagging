@@ -3,6 +3,7 @@ package io.redspace.pvp_flagging.data;
 import io.redspace.pvp_flagging.PvpFlagging;
 import io.redspace.pvp_flagging.core.PlayerFlagManager;
 import io.redspace.pvp_flagging.core.PvpZoneManager;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -15,6 +16,8 @@ import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
 
 @Mod.EventBusSubscriber
 public class PvpDataStorage extends SavedData {
@@ -30,7 +33,7 @@ public class PvpDataStorage extends SavedData {
     }
 
     @Override
-    public @NotNull CompoundTag save(@NotNull CompoundTag pCompoundTag) {
+    public @NotNull CompoundTag save(@NotNull CompoundTag compoundTag) {
         ListTag allZoneManagers = new ListTag();
         for (Map.Entry<ResourceKey<Level>, PvpZoneManager> entry : PvpZoneManager.INSTANCES.entrySet()) {
             CompoundTag tuple = new CompoundTag();
