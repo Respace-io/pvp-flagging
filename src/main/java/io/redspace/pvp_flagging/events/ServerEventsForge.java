@@ -9,6 +9,7 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
@@ -27,8 +28,10 @@ public class ServerEventsForge {
                 }
                 PlayerFlagManager.INSTANCE.syncToPlayer(serverPlayer);
             }
-            if (PvpConfig.SERVER.WELCOME_MESSAGE.get() && !serverPlayer.getPersistentData().getBoolean("pvp_flagging_hint")) {
-                serverPlayer.getPersistentData().putBoolean("pvp_flagging_hint", true);
+            if (PvpConfig.SERVER.WELCOME_MESSAGE.get() && !serverPlayer.getPersistentData().getCompound(Player.PERSISTED_NBT_TAG).getBoolean("pvp_flagging_hint")) {
+                var compound = serverPlayer.getPersistentData().getCompound(Player.PERSISTED_NBT_TAG);
+                compound.putBoolean("pvp_flagging_hint", true);
+                serverPlayer.getPersistentData().put(Player.PERSISTED_NBT_TAG, compound);
                 serverPlayer.sendSystemMessage(
                         Component.translatable("ui.pvp_flagging.system_message",
                                 Component.translatable("ui.pvp_flagging.welcome",
