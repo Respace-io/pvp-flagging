@@ -9,7 +9,9 @@ import io.redspace.pvp_flagging.core.PvpZoneManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import org.checkerframework.checker.units.qual.C;
 
 public class PvpZoneCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -30,7 +32,16 @@ public class PvpZoneCommand {
                                                                                 IntegerArgumentType.getInteger(context, "x2"),
                                                                                 IntegerArgumentType.getInteger(context, "z2"),
                                                                                 IntegerArgumentType.getInteger(context, "buffer"))
-                                                                        )))))))))
+                                                                        ))))))))
+                ).then((Commands.literal("add_chunk")
+                        .then((Commands.argument("buffer", IntegerArgumentType.integer())
+                                .executes((context) -> addZoneChunk(
+                                        context.getSource(),
+                                        IntegerArgumentType.getInteger(context, "buffer"))
+                                )))
+                        .executes((context) -> addZoneChunk(
+                                context.getSource(), 8
+                        ))))
                 .then(Commands.literal("remove")
                         .then((Commands.argument("name", StringArgumentType.string()))
                                 .executes((context) -> removeZone(context.getSource(), StringArgumentType.getString(context, "name")))))
@@ -60,6 +71,17 @@ public class PvpZoneCommand {
             source.sendSuccess(() -> Component.translatable("command.pvp_flagging.zone.list.empty"), true);
         }
         return 1;
+    }
+
+    private static int addZoneChunk(CommandSourceStack source, int buffer) {
+        var position = source.getPosition();
+        int chunkX = (int) (position.x / 16);
+        int chunkZ = (int) (position.z / 16);
+        int minX = chunkX * 16;
+        int minZ = chunkZ * 16;
+        int maxX = minX + 16;
+        int maxZ = minZ + 16;
+        return addZone(source, String.format("Chunk(%s,%s)", chunkX, chunkZ), minX, minZ, maxX, maxZ, buffer);
     }
 
     private static int addZone(CommandSourceStack source, String name, int x1, int z1, int x2, int z2, int buffer) {
