@@ -9,6 +9,7 @@ import io.redspace.pvp_flagging.core.PvpZoneManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.Level;
 
 public class PvpZoneCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -39,26 +40,45 @@ public class PvpZoneCommand {
     }
 
     private static int listZones(CommandSourceStack source) {
-        if (PvpZoneManager.INSTANCE != null) {
-            var sb = new StringBuilder();
-            PvpZoneManager.INSTANCE.getZones().forEach(zone -> sb.append(zone).append("\n"));
+        var server = source.getServer();
+        var sb = new StringBuilder();
+        var gold = "§6";
+        var white = "§f";
+        var red = "§c";
+        for (Level level : server.getAllLevels()) {
+            PvpZoneManager instance = PvpZoneManager.getInstance(level);
+            if (instance.getZones().isEmpty()) {
+                continue;
+            }
+            sb.append(gold).append(String.format("[%s]:\n", level.dimension().location()));
+            instance.getZones().forEach(zone -> sb.append("   ").append(red).append("* ").append(white).append(zone).append("\n"));
+        }
+        if (!sb.isEmpty()) {
+            sb.deleteCharAt(sb.length() - 1); // pop last newline
             source.sendSuccess(() -> Component.literal(sb.toString()), true);
+        } else {
+            source.sendSuccess(() -> Component.translatable("command.pvp_flagging.zone.list.empty"), true);
         }
         return 1;
     }
 
     private static int addZone(CommandSourceStack source, String name, int x1, int z1, int x2, int z2, int buffer) {
-        if (PvpZoneManager.INSTANCE != null) {
-            var pvpZone = new PvpZone(name, x1, z1, x2, z2, buffer);
-            return PvpZoneManager.INSTANCE.addZone(pvpZone) ? 1 : 0;
+        var level = source.getLevel();
+        var instance = PvpZoneManager.getInstance(level);
+        var pvpZone = new PvpZone(name, x1, z1, x2, z2, buffer);
+        if (instance.addZone(pvpZone)) {
+            source.sendSuccess(() -> Component.translatable("command.pvp_flagging.zone.add.success", pvpZone.getName()), false);
+            return 1;
+        } else {
+            source.sendFailure(Component.translatable("command.pvp_flagging.zone.add.fail", pvpZone.getName()));
+            return 0;
         }
-        return 0;
     }
 
     private static int removeZone(CommandSourceStack source, String name) {
-        if (PvpZoneManager.INSTANCE != null) {
-            PvpZoneManager.INSTANCE.removeZone(name);
-        }
+        var level = source.getLevel();
+        var instance = PvpZoneManager.getInstance(level);
+        instance.removeZone(name);
         return 1;
     }
 }

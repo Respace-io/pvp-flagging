@@ -6,8 +6,10 @@ import io.redspace.pvp_flagging.data.PvpDataStorage;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -16,22 +18,44 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @EventBusSubscriber(modid = PvpFlagging.MODID, bus = EventBusSubscriber.Bus.GAME)
 public class PvpZoneManager implements INBTSerializable<CompoundTag> {
-    public static PvpZoneManager INSTANCE;
+    public static Map<ResourceKey<Level>, PvpZoneManager> INSTANCES;
+//    public static PvpZoneManager INSTANCE;
 
     //TODO: This should probably get called on the server started event.
     public static void init() {
-        INSTANCE = new PvpZoneManager();
+//        INSTANCE = new PvpZoneManager();
+        INSTANCES = new HashMap<>(3);
     }
 
-    private final ArrayList<PvpZone> pvpZones = new ArrayList<>();
+    public static PvpZoneManager getInstance(Level level) {
+        return getInstance(level.dimension());
+    }
+
+    public static PvpZoneManager getInstance(ResourceKey<Level> level) {
+        //todo: INSTANCES is technically nullable. But not really. Should there be additional safety checks?
+        return INSTANCES.computeIfAbsent(level, dim -> new PvpZoneManager());
+    }
+
+    /**
+     * Map of PVP Zone name to pvpZones of name.
+     */
+    private final HashMap<String, PvpZone> pvpZones = new HashMap<>();
     private int boundsCheckTicks = 0;
 
+    /**
+     * Adds zone if name is not already present in manager
+     *
+     * @return Whether zone is added
+     */
     public boolean addZone(PvpZone pvpZone) {
-        if (!pvpZones.contains(pvpZone)) {
-            pvpZones.add(pvpZone);
+        if (!pvpZones.containsKey(pvpZone.getName())) {
+            pvpZones.put(pvpZone.getName(), pvpZone);
             PvpDataStorage.INSTANCE.setDirty();
             return true;
         }
@@ -39,9 +63,7 @@ public class PvpZoneManager implements INBTSerializable<CompoundTag> {
     }
 
     public boolean boundsCheckShouldWarn(Player player) {
-        for (int i = 0; i < pvpZones.size(); i++) {
-            var zone = pvpZones.get(i);
-
+        for (PvpZone zone : pvpZones.values()) {
             if (zone.getBufferedZoneBounds().contains(player.position())) {
                 return true;
             }
@@ -50,9 +72,7 @@ public class PvpZoneManager implements INBTSerializable<CompoundTag> {
     }
 
     public boolean boundsCheckShouldFlag(Player player) {
-        for (int i = 0; i < pvpZones.size(); i++) {
-            var zone = pvpZones.get(i);
-
+        for (PvpZone zone : pvpZones.values()) {
             if (zone.contains(player.position())) {
                 return true;
             }
@@ -69,23 +89,20 @@ public class PvpZoneManager implements INBTSerializable<CompoundTag> {
     }
 
     public void removeZone(String name) {
-        pvpZones.stream()
-                .filter(zone -> zone.getName().equals(name))
-                .findFirst()
-                .ifPresent(zone -> pvpZones.remove(zone));
-
-        PvpDataStorage.INSTANCE.setDirty();
+        if (pvpZones.remove(name) != null) {
+            PvpDataStorage.INSTANCE.setDirty();
+        }
     }
 
-    public ArrayList<PvpZone> getZones() {
-        return pvpZones;
+    public Collection<PvpZone> getZones() {
+        return pvpZones.values();
     }
 
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
         var tag = new CompoundTag();
         ListTag pvpZonesTag = new ListTag();
-        for (PvpZone pvpZone : pvpZones) {
+        for (PvpZone pvpZone : pvpZones.values()) {
             pvpZonesTag.add(pvpZone.serializeNBT(null));
         }
         tag.put("pvpZones", pvpZonesTag);
@@ -97,24 +114,27 @@ public class PvpZoneManager implements INBTSerializable<CompoundTag> {
         if (nbt.contains("pvpZones")) {
             var pvpZonesTag = nbt.getList("pvpZones", CompoundTag.TAG_COMPOUND);
             pvpZonesTag.forEach(pvpZoneTag -> {
-                pvpZones.add(PvpZone.getPvpZone((CompoundTag) pvpZoneTag));
+                var zone = PvpZone.getPvpZone((CompoundTag) pvpZoneTag);
+                pvpZones.put(zone.getName(), zone);
             });
         }
     }
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
-        if (!INSTANCE.getZones().isEmpty()) {
-            var player = event.getEntity();
-
-            //TODO: currently assumes this is server side.. maybe check explicitly
-
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+        PvpZoneManager instance = PvpZoneManager.getInstance(player.level());
+        if (!instance.getZones().isEmpty()) {
             var server = player.getServer();
-            if (server != null && server.overworld().getGameTime() % INSTANCE.boundsCheckTicks() == 0) {
-                if (!PlayerFlagManager.INSTANCE.isPlayerFlagged(player) && INSTANCE.boundsCheckShouldFlag(player)) {
-                    PlayerFlagManager.INSTANCE.flagPlayer((ServerPlayer) player);
-                } else if (INSTANCE.boundsCheckShouldWarn(player)) {
-                    PlayerFlagManager.INSTANCE.warnPlayer((ServerPlayer) player);
+            if (server != null && server.overworld().getGameTime() % instance.boundsCheckTicks() == 0) {
+                if (!PlayerFlagManager.INSTANCE.isPlayerFlagged(player)) {
+                    if (instance.boundsCheckShouldFlag(player)) {
+                        PlayerFlagManager.INSTANCE.flagPlayer(player);
+                    } else if (instance.boundsCheckShouldWarn(player)) {
+                        PlayerFlagManager.INSTANCE.warnPlayer(player);
+                    }
                 }
             }
         }
