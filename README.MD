@@ -23,7 +23,7 @@
 - unflag_wait_time_ticks = 1200
 - pvp_zone_bounds_check_ticks = 20
 
-[![Discord](https://img.shields.io/discord/1104430139275743293.svg?label=&amp;logo=discord&amp;logoColor=ffffff&amp;color=7389D8&amp;labelColor=6A7EC2&amp;style=for-the-badge)](https://discord.gg/aCvNWqz5)
+[![Discord](https://img.shields.io/discord/1104430139275743293.svg?label=&amp;logo=discord&amp;logoColor=ffffff&amp;color=7389D8&amp;labelColor=6A7EC2&amp;style=for-the-badge)](https://discord.gg/rNkA6ndFCT)
 
 ![Flagged Player](img/pvp_flagging_image_1.png)
 
