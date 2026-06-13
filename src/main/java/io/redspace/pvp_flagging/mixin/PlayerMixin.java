@@ -1,6 +1,5 @@
 package io.redspace.pvp_flagging.mixin;
 
-import io.redspace.pvp_flagging.PvpFlagging;
 import io.redspace.pvp_flagging.core.PlayerFlagManager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.scores.Team;

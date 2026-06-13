@@ -6,13 +6,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
-
 public class PvpUnflagScheduledPacket implements CustomPacketPayload {
-    public static final CustomPacketPayload.Type<PvpUnflagScheduledPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(PvpFlagging.MODID, "pvp_unflag_scheduled"));
+    public static final CustomPacketPayload.Type<PvpUnflagScheduledPacket> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(PvpFlagging.MODID, "pvp_unflag_scheduled"));
     public static final StreamCodec<RegistryFriendlyByteBuf, PvpUnflagScheduledPacket> STREAM_CODEC = CustomPacketPayload.codec(PvpUnflagScheduledPacket::write, PvpUnflagScheduledPacket::new);
     private final int ticks;
 

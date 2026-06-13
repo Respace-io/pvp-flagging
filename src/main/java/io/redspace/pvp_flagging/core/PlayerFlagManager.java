@@ -9,26 +9,23 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.util.INBTSerializable;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.UUID;
 
-@EventBusSubscriber(modid = PvpFlagging.MODID, bus = EventBusSubscriber.Bus.GAME)
-public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
+@EventBusSubscriber(modid = PvpFlagging.MODID)
+public class PlayerFlagManager {
     public static PlayerFlagManager INSTANCE;
 
     private final int EXPECTED_SIZE = 20; //This will prevent rehashing when the collection grows and shrinks for most use cases
@@ -63,7 +60,7 @@ public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
         if (serverPlayer != null) {
             cancelScheduledUnflag(serverPlayer);
             flaggedPlayers.add(serverPlayer.getUUID());
-            PvpDataStorage.INSTANCE.setDirty();
+            PvpDataStorage.markDirty();
             PacketDistributor.sendToAllPlayers(new PvpFlagUpdatePacket(serverPlayer.getUUID(), true));
         }
     }
@@ -97,7 +94,7 @@ public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
 
         if (serverPlayer != null && flaggedPlayers.contains(serverPlayer.getUUID())) {
             flaggedPlayers.remove(serverPlayer.getUUID());
-            PvpDataStorage.INSTANCE.setDirty();
+            PvpDataStorage.markDirty();
             PacketDistributor.sendToAllPlayers(new PvpFlagUpdatePacket(serverPlayer.getUUID(), false));
 
             if (!playersScheduledToUnflag.isEmpty()) {
@@ -116,7 +113,7 @@ public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
                 PvpFlagging.LOGGER.debug("Player {} is scheduled to be unflagged", serverPlayer.getUUID());
             }
 
-            var server = serverPlayer.getServer();
+            var server = serverPlayer.level().getServer();
             long scheduledTick = 0;
             int waitTicks = 0;
             if (server != null) {
@@ -149,7 +146,7 @@ public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
 
                         if (flaggedPlayers.contains(unflagItem.serverPlayer.getUUID())) {
                             flaggedPlayers.remove(unflagItem.serverPlayer.getUUID());
-                            PvpDataStorage.INSTANCE.setDirty();
+                            PvpDataStorage.markDirty();
                             PacketDistributor.sendToAllPlayers(new PvpFlagUpdatePacket(unflagItem.serverPlayer.getUUID(), false));
                         }
 
@@ -168,27 +165,44 @@ public class PlayerFlagManager implements INBTSerializable<CompoundTag> {
         }
     }
 
-    @Override
-    public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
+    public CompoundTag save() {
         var tag = new CompoundTag();
         ListTag uuids = new ListTag();
         for (UUID flaggedPlayer : flaggedPlayers) {
-            uuids.add(NbtUtils.createUUID(flaggedPlayer));
+            uuids.add(StringTag.valueOf(flaggedPlayer.toString()));
         }
         tag.put("flaggedPlayers", uuids);
         return tag;
     }
 
-    @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        ListTag list = nbt.getList("flaggedPlayers", CompoundTag.TAG_INT_ARRAY);
+    public void load(CompoundTag nbt) {
+        flaggedPlayers.clear();
+        if (!nbt.contains("flaggedPlayers")) {
+            return;
+        }
+        ListTag list = nbt.getList("flaggedPlayers").orElse(new ListTag());
         for (Tag uuidTag : list) {
             try {
-                var uuid = NbtUtils.loadUUID(uuidTag);
-                flaggedPlayers.add(uuid);
+                if (uuidTag instanceof StringTag stringTag) {
+                    flaggedPlayers.add(UUID.fromString(stringTag.value()));
+                } else if (uuidTag instanceof IntArrayTag intArrayTag) {
+                    flaggedPlayers.add(uuidFromIntArray(intArrayTag));
+                }
             } catch (Exception ignored) {
             }
         }
+    }
+
+    /**
+     * lazy reimplementation of int-array uuid serialization to easily port old nbt based serialization logic.
+     * todo: swap all serialization to codecs
+     */
+    private static UUID uuidFromIntArray(IntArrayTag tag) {
+        int[] data = tag.getAsIntArray();
+        if (data.length != 4) {
+            throw new IllegalArgumentException("Invalid UUID int array length");
+        }
+        return new UUID((long) data[0] << 32 | (data[1] & 0xFFFFFFFFL), (long) data[2] << 32 | (data[3] & 0xFFFFFFFFL));
     }
 
     public static class ScheduleUnflagItem {

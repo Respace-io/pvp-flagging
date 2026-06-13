@@ -5,19 +5,16 @@ import io.redspace.pvp_flagging.client.FlagIndicatorOverlay;
 import io.redspace.pvp_flagging.config.PvpConfig;
 import io.redspace.pvp_flagging.core.PlayerFlagManager;
 import io.redspace.pvp_flagging.core.PvpZoneManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
-import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 
 @Mod(PvpFlagging.MODID)
@@ -36,12 +33,15 @@ public class PvpFlagging {
         PvpZoneManager.init();
     }
 
-    @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents
-    {
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(PvpFlagging.MODID, path);
+    }
+
+    @EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
+    public static class ClientModEvents {
         @SubscribeEvent
         public static void registerOverlays(RegisterGuiLayersEvent event) {
-            event.registerBelowAll(ResourceLocation.fromNamespaceAndPath(PvpFlagging.MODID, "flag_status_overlay"), FlagIndicatorOverlay.INSTANCE);
+            event.registerBelowAll(PvpFlagging.id("flag_status_overlay"), FlagIndicatorOverlay.INSTANCE);
         }
     }
 }

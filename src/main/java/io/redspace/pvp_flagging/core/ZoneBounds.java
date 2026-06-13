@@ -1,14 +1,11 @@
 package io.redspace.pvp_flagging.core;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.INBTSerializable;
-import org.jetbrains.annotations.UnknownNullability;
 
-public class ZoneBounds implements INBTSerializable<CompoundTag> {
+public class ZoneBounds {
     public int minX;
     public int minZ;
     public int maxX;
@@ -242,8 +239,7 @@ public class ZoneBounds implements INBTSerializable<CompoundTag> {
         return new ZoneBounds((int) pCenter.x - pXSize / 2, (int) pCenter.z - pZSize / 2, (int) pCenter.x + pXSize / 2, (int) pCenter.z + pZSize / 2);
     }
 
-    @Override
-    public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
+    public CompoundTag save() {
         var tag = new CompoundTag();
         tag.putInt("minX", minX);
         tag.putInt("minZ", minZ);
@@ -252,17 +248,16 @@ public class ZoneBounds implements INBTSerializable<CompoundTag> {
         return tag;
     }
 
-    @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        minX = nbt.getInt("minX");
-        minZ = nbt.getInt("minZ");
-        maxX = nbt.getInt("maxX");
-        maxZ = nbt.getInt("maxZ");
+    public void load(CompoundTag nbt) {
+        minX = nbt.getInt("minX").orElse(0);
+        minZ = nbt.getInt("minZ").orElse(0);
+        maxX = nbt.getInt("maxX").orElse(0);
+        maxZ = nbt.getInt("maxZ").orElse(0);
     }
 
-    public static ZoneBounds getZoneBounds(CompoundTag nbt) {
+    public static ZoneBounds loadFromNbt(CompoundTag nbt) {
         var zoneBounds = new ZoneBounds();
-        zoneBounds.deserializeNBT(null, nbt);
+        zoneBounds.load(nbt);
         return zoneBounds;
     }
 }

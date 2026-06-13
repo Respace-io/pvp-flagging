@@ -7,7 +7,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.GAME, modid = PvpFlagging.MODID)
+@EventBusSubscriber(modid = PvpFlagging.MODID)
 public class CommandRegistry {
     @SubscribeEvent
     public static void onCommandsRegister(RegisterCommandsEvent event) {

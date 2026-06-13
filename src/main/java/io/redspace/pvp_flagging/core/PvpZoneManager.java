@@ -3,7 +3,6 @@ package io.redspace.pvp_flagging.core;
 import io.redspace.pvp_flagging.PvpFlagging;
 import io.redspace.pvp_flagging.config.PvpConfig;
 import io.redspace.pvp_flagging.data.PvpDataStorage;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
@@ -11,19 +10,15 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.LogicalSide;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.util.INBTSerializable;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import org.jetbrains.annotations.UnknownNullability;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-@EventBusSubscriber(modid = PvpFlagging.MODID, bus = EventBusSubscriber.Bus.GAME)
-public class PvpZoneManager implements INBTSerializable<CompoundTag> {
+@EventBusSubscriber(modid = PvpFlagging.MODID)
+public class PvpZoneManager {
     public static Map<ResourceKey<Level>, PvpZoneManager> INSTANCES;
 //    public static PvpZoneManager INSTANCE;
 
@@ -56,7 +51,7 @@ public class PvpZoneManager implements INBTSerializable<CompoundTag> {
     public boolean addZone(PvpZone pvpZone) {
         if (!pvpZones.containsKey(pvpZone.getName())) {
             pvpZones.put(pvpZone.getName(), pvpZone);
-            PvpDataStorage.INSTANCE.setDirty();
+            PvpDataStorage.markDirty();
             return true;
         }
         return false;
@@ -90,7 +85,7 @@ public class PvpZoneManager implements INBTSerializable<CompoundTag> {
 
     public void removeZone(String name) {
         if (pvpZones.remove(name) != null) {
-            PvpDataStorage.INSTANCE.setDirty();
+            PvpDataStorage.markDirty();
         }
     }
 
@@ -98,26 +93,26 @@ public class PvpZoneManager implements INBTSerializable<CompoundTag> {
         return pvpZones.values();
     }
 
-    @Override
-    public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
+    public CompoundTag save() {
         var tag = new CompoundTag();
         ListTag pvpZonesTag = new ListTag();
         for (PvpZone pvpZone : pvpZones.values()) {
-            pvpZonesTag.add(pvpZone.serializeNBT(null));
+            pvpZonesTag.add(pvpZone.save());
         }
         tag.put("pvpZones", pvpZonesTag);
         return tag;
     }
 
-    @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        if (nbt.contains("pvpZones")) {
-            var pvpZonesTag = nbt.getList("pvpZones", CompoundTag.TAG_COMPOUND);
-            pvpZonesTag.forEach(pvpZoneTag -> {
-                var zone = PvpZone.getPvpZone((CompoundTag) pvpZoneTag);
-                pvpZones.put(zone.getName(), zone);
-            });
+    public void load(CompoundTag nbt) {
+        pvpZones.clear();
+        if (!nbt.contains("pvpZones")) {
+            return;
         }
+        var pvpZonesTag = nbt.getList("pvpZones").orElse(new ListTag());
+        pvpZonesTag.forEach(pvpZoneTag -> {
+            var zone = PvpZone.loadFromNbt((CompoundTag) pvpZoneTag);
+            pvpZones.put(zone.getName(), zone);
+        });
     }
 
     @SubscribeEvent
@@ -127,7 +122,7 @@ public class PvpZoneManager implements INBTSerializable<CompoundTag> {
         }
         PvpZoneManager instance = PvpZoneManager.getInstance(player.level());
         if (!instance.getZones().isEmpty()) {
-            var server = player.getServer();
+            var server = player.level().getServer();
             if (server != null && server.overworld().getGameTime() % instance.boundsCheckTicks() == 0) {
                 if (!PlayerFlagManager.INSTANCE.isPlayerFlagged(player)) {
                     if (instance.boundsCheckShouldFlag(player)) {

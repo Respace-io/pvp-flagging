@@ -11,7 +11,6 @@ import net.minecraft.network.chat.Component;
 public class PvpFlagCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralCommandNode<CommandSourceStack> command = dispatcher.register(Commands.literal("pvpFlag")
-                .requires((p) -> p.hasPermission(0))
                 .executes((context) -> toggleFlag(context.getSource()))
                 .then(Commands.literal("on")
                         .executes((context) -> flag(context.getSource())))

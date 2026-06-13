@@ -15,7 +15,7 @@ public class PlayerTabOverlayMixin {
 
     @Inject(method = "decorateName", at = @At(value = "RETURN"), cancellable = true)
     private void decorateFlagIndicator(PlayerInfo pPlayerInfo, MutableComponent pName, CallbackInfoReturnable<Component> cir) {
-        if (ClientHelper.isFlagged(pPlayerInfo.getProfile().getId())) {
+        if (ClientHelper.isFlagged(pPlayerInfo.getProfile().id())) {
             // return value is always a mutable component
             cir.setReturnValue(((MutableComponent) cir.getReturnValue()).append(ClientHelper.NAME_TAG_INDICATOR));
         }

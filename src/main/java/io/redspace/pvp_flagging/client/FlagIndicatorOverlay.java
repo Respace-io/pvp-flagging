@@ -3,19 +3,19 @@ package io.redspace.pvp_flagging.client;
 import io.redspace.pvp_flagging.PvpFlagging;
 import io.redspace.pvp_flagging.config.ClientConfig;
 import io.redspace.pvp_flagging.config.PvpConfig;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.LayeredDraw;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.neoforged.neoforge.client.gui.GuiLayer;
 
 import java.util.function.Function;
 
-public class FlagIndicatorOverlay implements LayeredDraw.Layer {
+public class FlagIndicatorOverlay implements GuiLayer {
     public static final FlagIndicatorOverlay INSTANCE = new FlagIndicatorOverlay();
-    ResourceLocation FLAG = ResourceLocation.fromNamespaceAndPath(PvpFlagging.MODID, "textures/gui/pvp_flag.png");
+    private static final Identifier FLAG = Identifier.fromNamespaceAndPath(PvpFlagging.MODID, "textures/gui/pvp_flag.png");
 
     public enum HudAnchor {
         TopLeft(width -> 0, height -> 0),
@@ -33,7 +33,7 @@ public class FlagIndicatorOverlay implements LayeredDraw.Layer {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, DeltaTracker pDeltaTracker) {
+    public void render(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker) {
         var screenWidth = guiGraphics.guiWidth();
         var screenHeight = guiGraphics.guiHeight();
         var player = Minecraft.getInstance().player;
@@ -62,10 +62,10 @@ public class FlagIndicatorOverlay implements LayeredDraw.Layer {
         x += (x > halfWidth ? -buffer : buffer + iconSize / 2) + xOffset;
         y += (y > halfHeight ? -buffer : buffer + iconSize / 2) + yOffset;
 
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().scale(spriteScale, spriteScale, spriteScale);
-        guiGraphics.blit(FLAG, (int) (x / spriteScale) - spriteSize / 2, (int) (y / spriteScale) - spriteSize / 2, 0, 0, 21, 21, 21, 21);
-        guiGraphics.pose().popPose();
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().scale(spriteScale, spriteScale);
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, FLAG, (int) (x / spriteScale) - spriteSize / 2, (int) (y / spriteScale) - spriteSize / 2, 0, 0, 21, 21, 21, 21);
+        guiGraphics.pose().popMatrix();
 
         if (unflagging) {
             float secondsLeft = unflagTicksLeft / 20f;
@@ -74,7 +74,7 @@ public class FlagIndicatorOverlay implements LayeredDraw.Layer {
             var colorL = (int) Mth.lerp(f * f, 50, 255);
             var color = 255 << 24 | 255 << 16 | colorL << 8 | colorL;
 
-            guiGraphics.drawString(Minecraft.getInstance().font, timer, x - Minecraft.getInstance().font.width(timer) / 2, y + iconSize - 14, color, true);
+            guiGraphics.text(Minecraft.getInstance().font, timer, x - Minecraft.getInstance().font.width(timer) / 2, y + iconSize - 14, color, true);
         }
     }
 }

@@ -2,9 +2,9 @@ package io.redspace.pvp_flagging.events;
 
 import io.redspace.pvp_flagging.PvpFlagging;
 import io.redspace.pvp_flagging.config.PvpConfig;
-import io.redspace.pvp_flagging.config.ServerConfig;
 import io.redspace.pvp_flagging.core.PlayerFlagManager;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -15,7 +15,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
-@EventBusSubscriber(modid = PvpFlagging.MODID, bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber(modid = PvpFlagging.MODID)
 public class ServerEventsForge {
     @SubscribeEvent
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
@@ -28,19 +28,22 @@ public class ServerEventsForge {
                 }
                 PlayerFlagManager.INSTANCE.syncToPlayer(serverPlayer);
             }
-            if (PvpConfig.SERVER.WELCOME_MESSAGE.get() && !serverPlayer.getPersistentData().getCompound(Player.PERSISTED_NBT_TAG).getBoolean("pvp_flagging_hint")) {
-                var compound = serverPlayer.getPersistentData().getCompound(Player.PERSISTED_NBT_TAG);
-                compound.putBoolean("pvp_flagging_hint", true);
-                serverPlayer.getPersistentData().put(Player.PERSISTED_NBT_TAG, compound);
-                serverPlayer.sendSystemMessage(
-                        Component.translatable("ui.pvp_flagging.system_message",
-                                Component.translatable("ui.pvp_flagging.welcome",
-                                        Component.translatable("ui.pvp_flagging.welcome.command_hint")
-                                                .withStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/pvpFlag")))
-                                                .withStyle(ChatFormatting.RED, ChatFormatting.UNDERLINE)
-                                ).withStyle(ChatFormatting.YELLOW)
-                        ).withStyle(ChatFormatting.GOLD)
-                );
+            if (PvpConfig.SERVER.WELCOME_MESSAGE.get()) {
+                var persisted = serverPlayer.getPersistentData();
+                var compound = persisted.getCompound(Player.PERSISTED_NBT_TAG).orElse(new CompoundTag());
+                if (!compound.getBoolean("pvp_flagging_hint").orElse(false)) {
+                    compound.putBoolean("pvp_flagging_hint", true);
+                    persisted.put(Player.PERSISTED_NBT_TAG, compound);
+                    serverPlayer.sendSystemMessage(
+                            Component.translatable("ui.pvp_flagging.system_message",
+                                    Component.translatable("ui.pvp_flagging.welcome",
+                                            Component.translatable("ui.pvp_flagging.welcome.command_hint")
+                                                    .withStyle(Style.EMPTY.withClickEvent(new ClickEvent.SuggestCommand("/pvpFlag")))
+                                                    .withStyle(ChatFormatting.RED, ChatFormatting.UNDERLINE)
+                                    ).withStyle(ChatFormatting.YELLOW)
+                            ).withStyle(ChatFormatting.GOLD)
+                    );
+                }
             }
         }
     }

@@ -8,13 +8,13 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
 
 public class SyncPvpDataPacket implements CustomPacketPayload {
-    public static final CustomPacketPayload.Type<SyncPvpDataPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(PvpFlagging.MODID, "sync_pvp_data"));
+    public static final CustomPacketPayload.Type<SyncPvpDataPacket> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(PvpFlagging.MODID, "sync_pvp_data"));
     public static final StreamCodec<RegistryFriendlyByteBuf, SyncPvpDataPacket> STREAM_CODEC = CustomPacketPayload.codec(SyncPvpDataPacket::write, SyncPvpDataPacket::new);
     private final ObjectSet<UUID> flaggedPlayers;
 

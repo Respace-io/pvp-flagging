@@ -6,14 +6,14 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
 
 public class PvpFlagUpdatePacket implements CustomPacketPayload {
 
-    public static final CustomPacketPayload.Type<PvpFlagUpdatePacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(PvpFlagging.MODID, "pvp_flag_update"));
+    public static final CustomPacketPayload.Type<PvpFlagUpdatePacket> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(PvpFlagging.MODID, "pvp_flag_update"));
     public static final StreamCodec<RegistryFriendlyByteBuf, PvpFlagUpdatePacket> STREAM_CODEC = CustomPacketPayload.codec(PvpFlagUpdatePacket::write, PvpFlagUpdatePacket::new);
     private final boolean flagged;
     private final UUID playerUUID;

@@ -1,15 +1,12 @@
 package io.redspace.pvp_flagging.core;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.Objects;
 
-public class PvpZone implements INBTSerializable<CompoundTag> {
+public class PvpZone {
     private String name;
     private int buffer;
     private ZoneBounds zoneBounds;
@@ -58,25 +55,24 @@ public class PvpZone implements INBTSerializable<CompoundTag> {
         return String.format("Name:%s, Buffer:%d, %s", name, buffer, zoneBounds);
     }
 
-    @Override
-    public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
+    public CompoundTag save() {
         var tag = new CompoundTag();
         tag.putString("name", name);
         tag.putInt("buffer", buffer);
-        tag.put("zoneBounds", zoneBounds.serializeNBT(null));
+        tag.put("zoneBounds", zoneBounds.save());
         return tag;
     }
 
-    @Override
-    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        name = nbt.getString("name");
-        buffer = nbt.getInt("buffer");
-        zoneBounds = ZoneBounds.getZoneBounds(nbt.getCompound("zoneBounds"));
+    public void load(CompoundTag nbt) {
+        name = nbt.getString("name").orElse("");
+        buffer = nbt.getInt("buffer").orElse(0);
+        zoneBounds = ZoneBounds.loadFromNbt(nbt.getCompound("zoneBounds").orElse(new CompoundTag()));
+        bufferedZoneBounds = null;
     }
 
-    public static PvpZone getPvpZone(CompoundTag nbt) {
+    public static PvpZone loadFromNbt(CompoundTag nbt) {
         var pvpZone = new PvpZone();
-        pvpZone.deserializeNBT(null, nbt);
+        pvpZone.load(nbt);
         return pvpZone;
     }
 }

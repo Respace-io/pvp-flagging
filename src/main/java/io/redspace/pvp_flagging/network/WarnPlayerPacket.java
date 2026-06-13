@@ -6,13 +6,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
-
 public class WarnPlayerPacket implements CustomPacketPayload {
-    public static final CustomPacketPayload.Type<WarnPlayerPacket> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(PvpFlagging.MODID, "warn_player"));
+    public static final CustomPacketPayload.Type<WarnPlayerPacket> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(PvpFlagging.MODID, "warn_player"));
     public static final StreamCodec<RegistryFriendlyByteBuf, WarnPlayerPacket> STREAM_CODEC = CustomPacketPayload.codec(WarnPlayerPacket::write, WarnPlayerPacket::new);
 
     public WarnPlayerPacket() {

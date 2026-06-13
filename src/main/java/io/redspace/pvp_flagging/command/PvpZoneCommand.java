@@ -9,14 +9,12 @@ import io.redspace.pvp_flagging.core.PvpZoneManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import org.checkerframework.checker.units.qual.C;
 
 public class PvpZoneCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralCommandNode<CommandSourceStack> command = dispatcher.register(Commands.literal("pvpZone")
-                .requires((p) -> p.hasPermission(2))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("add")
                         .then((Commands.argument("name", StringArgumentType.string()))
                                 .then((Commands.argument("x1", IntegerArgumentType.integer()))
@@ -61,7 +59,7 @@ public class PvpZoneCommand {
             if (instance.getZones().isEmpty()) {
                 continue;
             }
-            sb.append(gold).append(String.format("[%s]:\n", level.dimension().location()));
+            sb.append(gold).append(String.format("[%s]:\n", level.dimension().identifier()));
             instance.getZones().forEach(zone -> sb.append("   ").append(red).append("* ").append(white).append(zone).append("\n"));
         }
         if (!sb.isEmpty()) {
